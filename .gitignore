@@ -1,0 +1,24 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+coverage
+*.tsbuildinfo
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+qa-screenshots/
+test-results/
+playwright-report/
+
+# editors, agents & local artefacts
+.idea/
+.vscode/
+.claude/
+.ai/
+CLAUDE.md
+.DS_Store
+Thumbs.db
