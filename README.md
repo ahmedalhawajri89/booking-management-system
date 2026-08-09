@@ -1,93 +1,51 @@
-# Booking Management System — Vue 3
+# Booking Management System
 
-An Arabic-first (RTL) booking management product: a guest booking flow and a dense operator console, built on a real domain model with a live availability engine.
+An Arabic-first appointment booking system: customers book a service online without creating an account, and the business manages the whole day from one console.
 
-Rebuilt from a Next.js prototype after a full UX/UI audit. The audit, information architecture, design system and implementation plan are in [`docs/`](./docs).
-
----
-
-## What it actually does
-
-**For the customer**
-
-- Books online in three steps, seeing only genuinely free times
-- Gets a quotable reference (`BK-2026-0431`)
-- Looks the booking up later at `/booking/:reference` (verified by phone) and can cancel it
-- A refresh mid-flow does not lose the draft
-
-**For the operator**
-
-- **Today** — what needs action, the day as a proportional timeline with a now-line, what's next, and live occupancy
-- **Calendar** — day and agenda views over the same data
-- **Bookings** — search by reference, name or phone, with quick filters and facets
-- **Booking detail** — a drawer that is the single source of truth: status-aware actions (confirm · reschedule · complete · no-show · cancel), payment recording, contact, and a full audit trail. Destructive actions ship an undo.
-- **Customers** — profiles with lifetime stats derived from bookings, never invented
-- Keyboard: `/` focuses search, `N` opens the create drawer, `Esc` closes overlays
+Built as a complete product rather than a screen mockup — the availability logic, conflict detection and status workflow are all real.
 
 ---
 
-## Architecture
+## What it does
 
-```
-src/
-├── types/         Domain model — ISO instants, minor-unit money, machine-value statuses
-├── lib/
-│   ├── availability.ts  The slot engine: business hours − duration − buffer − existing bookings
-│   ├── format.ts        Every user-visible number and date (Intl + date-fns/ar)
-│   ├── status.ts        Status → label + icon + tone, and legal transitions
-│   └── clone.ts
-├── data/
-│   ├── catalog.ts       Services, resources, business hours
-│   ├── seed.ts          Demo data anchored to "today", including a deliberate conflict
-│   └── repository.ts    The persistence seam — swap for an HTTP client, nothing else changes
-├── stores/        Pinia: bookings, customers, auth
-├── components/
-│   ├── ui/        Button, Input, SearchInput, StatusBadge, Drawer, ConfirmDialog, EmptyState, Skeleton
-│   └── booking/   DateStrip, TimeSlotGrid, BookingRow, DayTimeline, detail & form drawers
-├── layouts/       OperatorLayout (rail → icons → bottom tabs)
-└── views/         Guest: Home, Booking, MyBooking · Operator: Today, Calendar, Bookings, Customers, Settings
-```
+**For the customer.** Picks a service, sees only the times that are genuinely free, books in four steps and gets a reference code. No sign-up required. The code can be used later to look the booking up, or to cancel it.
 
-### Availability is computed, never stored
-
-```
-slots = grid(businessHours[weekday], 30min)
-      − slots that would end after closing
-      − slots overlapping a pending/confirmed booking on that resource
-      − slots in the past
-```
-
-One function feeds the guest wizard, the operator form, conflict detection and the occupancy bar — so they cannot disagree.
-
-### Swapping in a real backend
-
-`src/data/repository.ts` is the only file that knows where data lives. It ships a `localStorage` implementation behind a `Repository` interface; replacing it with a Laravel/REST client requires no change in any component or store.
+**For the operator.** Opens on a day board showing today's schedule against a live now-line. A *needs attention* queue surfaces bookings that are unconfirmed or unpaid. Status and payment can be changed in one click, with undo. Search covers customer name, phone and reference.
 
 ---
 
-## Design system
+## The part that matters
 
-Documented in [`docs/DESIGN_SYSTEM.md`](./docs/DESIGN_SYSTEM.md), implemented in `src/assets/main.css`.
+Most booking demos store a time as text and let you double-book. This one does not.
 
-- **Two surfaces, one system** — the guest side is warm and spacious; the operator side is neutral and dense. Gradient is a brand moment on marketing screens and appears **zero times** inside `/app`.
-- **Radius encodes permanence** (badge 4 → button 8 → card 12 → drawer 16), not decoration.
-- **Border-first elevation** — four shadow levels, warm-tinted, because stacked shadows turn a dense screen to mud.
-- **Status is never colour-alone** — always tone + label + icon.
-- Warm stone neutrals override Tailwind's cool greys so every surface shares one temperature.
+**Availability is computed, not stored.** Free slots are generated from the service duration, the buffer time needed between appointments, the resource being booked and the business hours for that weekday. Past times on the current day are excluded automatically.
 
-### Accessibility
+**Conflicts are detected with half-open interval overlap** — `aStart < bEnd && bStart < aEnd` — so an appointment ending at 10:00 and one starting at 10:00 do not collide, while any real overlap does. Only pending and confirmed bookings block; cancelled ones free their slot immediately.
 
-One global `:focus-visible` ring · every icon-only control has an accessible name · drawers trap focus, close on `Esc` and restore focus · date and time pickers are `radiogroup`s with arrow-key navigation · inputs own their label, error, `aria-invalid` and `aria-describedby` · skip-to-content link · `prefers-reduced-motion` honoured · touch targets ≥ 44 px.
+**The domain model is machine-readable.** Times are ISO 8601 instants, money is stored in minor units, and statuses are machine values rendered through one label map. That is what makes the calendar, the filters and the totals possible at all.
 
-### RTL
+---
 
-Logical properties throughout (`ms/me`, `ps/pe`, `inset-inline-*`) · LTR islands for phone, email and reference codes · dates via `date-fns/ar`, money via `Intl.NumberFormat('ar-SA')` · drawers slide from the inline-end edge so the direction inverts correctly.
+## Features
+
+- Guest booking flow with live slot generation and a reference code
+- Booking lookup and cancellation by reference, no account needed
+- Operator day board with a live now-line and proportional timeline
+- Needs-attention queue for unconfirmed and unpaid bookings
+- Status and payment workflow with undo on every change
+- Conflict detection across services, resources and buffer times
+- Customer directory with booking history
+- Business hours and service settings
+- Full RTL layout using CSS logical properties, with LTR islands for phone numbers
+- Keyboard-accessible drawers, focus traps and `prefers-reduced-motion` support
 
 ---
 
 ## Tech stack
 
-**Vue 3.5 (Composition API, `<script setup>`) · TypeScript · Vite 6 · Tailwind CSS 4 · Pinia · Vue Router 4 · date-fns · lucide-vue-next · vue-sonner**
+**Vue 3.5** with `<script setup>` · **TypeScript** · **Vite 6** · **Tailwind CSS 4** (`@theme` tokens) · **Pinia** · **Vue Router 4** with route guards · **date-fns** with the Arabic locale · **lucide-vue-next** · **vue-sonner** · **Playwright** for the end-to-end run.
+
+Data lives behind a repository interface, currently backed by `localStorage`. Swapping in a real HTTP API means replacing one file — nothing above it changes.
 
 ---
 
@@ -96,30 +54,65 @@ Logical properties throughout (`ms/me`, `ps/pe`, `inset-inline-*`) · LTR island
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm run build        # vue-tsc + production build
-npm run type-check
-npm run format       # prettier with Tailwind class sorting
-npm run qa           # end-to-end walkthrough + screenshots at 4 widths
 ```
 
-Sign in with any email and a 6+ character password — the demo session is local only.
+Other scripts:
 
-`npm run qa` drives a real browser through the guard redirect, the 404, the full guest booking flow, the reference lookup, sign-in, the operator search, the detail drawer and a status change, then captures three viewport sizes and fails loudly on any console error.
+```bash
+npm run build        # production build
+npm run qa           # automated Playwright walkthrough
+npm run format       # Prettier with the Tailwind class sorter
+```
+
+No backend or database is required. Seed data regenerates for the current day on first load, so the schedule is never empty.
+
+---
+
+## Project structure
+
+```
+src/
+  types/index.ts            domain model — the source of truth
+  lib/availability.ts       slot generation, overlap and occupancy
+  data/repository.ts        persistence seam (localStorage today, HTTP later)
+  data/seed.ts              realistic seed data, re-dated daily
+  stores/bookings.ts        Pinia store: queries, mutations, undo
+  views/                    public pages and the /app operator console
+  components/booking/       drawers, timeline, slot picker
+  components/marketing/     landing page sections
+  components/ui/            base button, input, drawer, badge
+  directives/reveal.ts      scroll-reveal, one shared IntersectionObserver
+docs/
+  UI_UX_AUDIT.md            what was wrong and why
+  INFORMATION_ARCHITECTURE.md
+  DESIGN_SYSTEM.md          tokens, elevation, status colour rules
+  IMPLEMENTATION_PLAN.md
+scripts/qa.mjs              end-to-end walkthrough across 3 viewports
+```
 
 ---
 
 ## Author
 
-**Ahmed Al-Hawajiri** — Full-Stack Web Developer · Palestine
+**Ahmed Al-Hawajiri** — Full-Stack Developer
+[GitHub](https://github.com/ahmedalhawajri89) · [LinkedIn](https://www.linkedin.com/in/ahmedalhawajri)
+
+Licensed under the MIT License.
 
 ---
 
 <div dir="rtl">
 
-### نبذة
+## نبذة بالعربية
 
-نظام إدارة حجوزات عربي (RTL) مبني على نموذج بيانات حقيقي ومحرك توافر يحسب الأوقات المتاحة من ساعات العمل ومدة الخدمة والحجوزات القائمة — فيكشف التعارضات ويمنع الحجز المزدوج.
+نظام حجز مواعيد عربي بالكامل. الزبون يحجز خدمة أونلاين بدون إنشاء حساب ويستلم رقماً مرجعياً، وصاحب النشاط يدير يومه كامل من لوحة واحدة.
 
-يضم واجهة عميل لحجز موعد ومتابعته لاحقاً برقم مرجعي، ولوحة مشغّل تعرض ما يحتاج إجراءً وجدول اليوم كخط زمني، مع درج تفاصيل يمثّل المصدر الوحيد للحقيقة لكل حجز.
+**الجزء المهم في المشروع** ليس الشكل، بل المنطق: المواعيد المتاحة تُحسب لحظياً من مدة الخدمة والفاصل الزمني بين المواعيد وساعات العمل، والتعارض يُكتشف بتداخل الفترات نصف المفتوحة — فموعد ينتهي 10:00 وآخر يبدأ 10:00 لا يتعارضان، بينما أي تداخل حقيقي يُرفض. النتيجة أن المورد لا يمكن حجزه مرتين.
+
+الأوقات مخزّنة بصيغة ISO 8601 والمبالغ بالوحدات الصغرى والحالات بقيم برمجية — وهذا ما يجعل التقويم والفلاتر والمجاميع ممكنة أصلاً.
+
+**التقنيات:** Vue 3 و TypeScript و Tailwind CSS 4 و Pinia و Vite، مع اختبارات Playwright. طبقة البيانات معزولة خلف واجهة واحدة، فاستبدال التخزين المحلي بـ API حقيقي يتطلب تعديل ملف واحد فقط.
+
+المشروع مرفق بتوثيق مكتوب: تدقيق تجربة المستخدم، معمارية المعلومات، ونظام التصميم.
 
 </div>
