@@ -7,6 +7,7 @@ import AppLogo from '@/components/ui/AppLogo.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import { useAuthStore } from '@/stores/auth'
+import { isDemoBackend } from '@/data/repository'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -28,9 +29,29 @@ async function submit() {
   if (nameError() || emailError() || passwordError()) return
   submitting.value = true
   try {
-    auth.signIn(email.value, name.value)
-    toast.success('تم إنشاء حسابك')
-    await router.push('/app')
+    await auth.signUp(email.value, password.value, name.value.trim())
+
+    // A new account is a customer. Operator access is granted server-side, so
+    // signing up cannot land you in the operator console — it lands you on
+    // the booking page, which is what a customer came for.
+    if (isDemoBackend) {
+      toast.success('تم إنشاء حسابك')
+      await router.push('/app')
+    } else if (auth.isAuthenticated) {
+      toast.success('تم إنشاء حسابك')
+      await router.push('/book')
+    } else {
+      // Supabase is configured to confirm addresses, so there is no session
+      // yet and saying "welcome" would be a lie.
+      toast.success('أرسلنا رابط تأكيد إلى بريدك')
+      await router.push('/login')
+    }
+  } catch (e) {
+    toast.error(
+      e instanceof Error && /already registered/i.test(e.message)
+        ? 'هذا البريد مسجّل بالفعل'
+        : 'تعذّر إنشاء الحساب. حاول مرة أخرى.',
+    )
   } finally {
     submitting.value = false
   }

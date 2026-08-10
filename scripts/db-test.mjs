@@ -75,6 +75,12 @@ try {
     console.log(`  ok ${f}`)
   }
 
+  // The seed is part of what has to keep working: it is the first thing a new
+  // project runs, and a broken seed is a broken first impression.
+  console.log('› applying seed')
+  psql('/supabase/seed.sql')
+  console.log('  ok seed.sql')
+
   console.log('› running tests')
   const tests = readdirSync('supabase/tests')
     .filter((f) => f !== '00_shim.sql' && f.endsWith('.sql'))

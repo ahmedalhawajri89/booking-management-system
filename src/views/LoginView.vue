@@ -7,6 +7,7 @@ import AppLogo from '@/components/ui/AppLogo.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import { useAuthStore } from '@/stores/auth'
+import { isDemoBackend } from '@/data/repository'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -27,10 +28,18 @@ async function submit() {
   if (emailError() || passwordError()) return
   submitting.value = true
   try {
-    auth.signIn(email.value)
+    await auth.signIn(email.value, password.value)
     toast.success('أهلاً بعودتك')
     const redirect = (route.query.redirect as string) || '/app'
     await router.push(redirect)
+  } catch (e) {
+    // Deliberately not "no account with that email": that would let anyone
+    // enumerate which addresses are registered.
+    toast.error(
+      e instanceof Error && /Invalid login/i.test(e.message)
+        ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+        : 'تعذّر تسجيل الدخول. حاول مرة أخرى.',
+    )
   } finally {
     submitting.value = false
   }
@@ -74,8 +83,10 @@ async function submit() {
           </BaseButton>
         </form>
 
+        <!-- Only true on the demo backend, so it is only shown there. -->
         <p
-          class="mt-4 rounded-[var(--radius-md)] bg-gray-100 px-3 py-2 text-xs leading-relaxed text-gray-500"
+          v-if="isDemoBackend"
+          class="bg-surface-sunken text-fg-subtle mt-4 rounded-[var(--radius-md)] px-3 py-2 text-xs leading-relaxed"
         >
           نسخة تجريبية — البيانات محفوظة في متصفحك فقط، وأي بريد وكلمة مرور صالحان للدخول.
         </p>

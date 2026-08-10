@@ -41,6 +41,14 @@ create policy profile_update_self on public.profiles
 -- The guest booking page has no session and still has to show services,
 -- resources and opening hours. Only active rows are exposed — a service the
 -- operator turned off should not be discoverable.
+--
+-- Note what this does NOT do: it is not scoped by organization, and cannot
+-- be. An anonymous visitor carries no org claim, so there is nothing to scope
+-- against; callers pass org_id as a filter instead. On a single-tenant
+-- deployment that is exactly equivalent. If this ever serves several
+-- businesses, the catalogue of one would be readable by anyone who knows
+-- another's org id, and this policy needs a public `slug` lookup or a
+-- security-definer function instead. Writes are already org-scoped.
 -- ---------------------------------------------------------------------------
 create policy services_public_read on public.services
   for select to anon, authenticated using (is_active);

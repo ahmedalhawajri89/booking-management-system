@@ -79,11 +79,19 @@ select pg_temp.expect('anon cannot read customers',
 select pg_temp.expect('anon cannot read bookings',
   (select count(*) from public.bookings), 0);
 
+-- Scoped by org because the public catalogue policies are not (see the note
+-- in 0005) and the seed puts another organization in the same database.
 select pg_temp.expect('anon can read active services',
-  (select count(*) from public.services), 1);
+  (select count(*) from public.services
+   where org_id = '11111111-1111-1111-1111-111111111111'), 1);
+
+select pg_temp.expect('anon cannot read an inactive service',
+  (select count(*) from public.services
+   where org_id = '11111111-1111-1111-1111-111111111111' and not is_active), 0);
 
 select pg_temp.expect('anon can read opening hours',
-  (select count(*) from public.business_hours), 7);
+  (select count(*) from public.business_hours
+   where org_id = '11111111-1111-1111-1111-111111111111'), 7);
 
 do $$ begin
   insert into public.bookings (org_id, reference, customer_id, service_id, resource_id,
@@ -207,7 +215,8 @@ select pg_temp.expect('operator sees every customer',
   (select count(*) from public.customers), 3);
 
 select pg_temp.expect('operator sees inactive services too',
-  (select count(*) from public.services), 2);
+  (select count(*) from public.services
+   where org_id = '11111111-1111-1111-1111-111111111111'), 2);
 
 do $$
 declare n int;
