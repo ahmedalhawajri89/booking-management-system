@@ -21,7 +21,11 @@ const SECTORS = [
 </script>
 
 <template>
-  <section class="border-primary-100 relative border-y bg-surface/60 py-12 backdrop-blur">
+  <!-- id is the hero's "skip to content" target -->
+  <section
+    id="proof"
+    class="border-border bg-canvas relative scroll-mt-4 border-y py-12"
+  >
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <dl class="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
         <div v-reveal class="text-center">
