@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowLeft, CalendarCheck, Play } from 'lucide-vue-next'
 import HeroPreview from './HeroPreview.vue'
@@ -96,7 +96,7 @@ onBeforeUnmount(() => {
             </RouterLink>
             <RouterLink
               to="/login"
-              class="border-primary-200 hover:border-primary-300 inline-flex w-full items-center justify-center gap-2 rounded-full border bg-white/80 px-7 py-3.5 text-base font-bold text-gray-900 backdrop-blur transition-colors hover:bg-white sm:w-auto"
+              class="border-primary-200 hover:border-primary-300 inline-flex w-full items-center justify-center gap-2 rounded-full border bg-surface/80 px-7 py-3.5 text-base font-bold text-gray-900 backdrop-blur transition-colors hover:bg-surface sm:w-auto"
             >
               <Play class="text-primary-600 h-4 w-4" aria-hidden="true" />
               شاهد لوحة التحكم

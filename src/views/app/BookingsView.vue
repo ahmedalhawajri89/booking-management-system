@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { isSameDay, isWithinInterval, startOfDay, addDays } from 'date-fns'
@@ -130,7 +130,7 @@ function clearAll() {
           :class="
             quick === f.value
               ? 'border-primary-600 bg-primary-600 text-white'
-              : 'hover:border-primary-300 hover:text-primary-700 border-gray-200 bg-white text-gray-600'
+              : 'hover:border-primary-300 hover:text-primary-700 border-gray-200 bg-surface text-gray-600'
           "
           @click="quick = f.value"
         >
@@ -143,7 +143,7 @@ function clearAll() {
         <select
           id="f-status"
           v-model="status"
-          class="focus:border-primary-400 h-9 rounded-[var(--radius-md)] border border-gray-200 bg-white px-2.5 text-sm text-gray-700 focus:outline-none"
+          class="focus:border-primary-400 h-9 rounded-[var(--radius-md)] border border-gray-200 bg-surface px-2.5 text-sm text-gray-700 focus:outline-none"
         >
           <option value="all">كل الحالات</option>
           <option v-for="(meta, key) in BOOKING_STATUS" :key="key" :value="key">
@@ -155,7 +155,7 @@ function clearAll() {
         <select
           id="f-service"
           v-model="serviceId"
-          class="focus:border-primary-400 h-9 rounded-[var(--radius-md)] border border-gray-200 bg-white px-2.5 text-sm text-gray-700 focus:outline-none"
+          class="focus:border-primary-400 h-9 rounded-[var(--radius-md)] border border-gray-200 bg-surface px-2.5 text-sm text-gray-700 focus:outline-none"
         >
           <option value="all">كل الخدمات</option>
           <option v-for="s in services" :key="s.id" :value="s.id">{{ s.name }}</option>

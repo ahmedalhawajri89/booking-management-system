@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { useCountUp } from '@/composables/useCountUp'
 
 /** Four figures that arrive as you reach them. Suffixes stay outside the
@@ -21,7 +21,7 @@ const SECTORS = [
 </script>
 
 <template>
-  <section class="border-primary-100 relative border-y bg-white/60 py-12 backdrop-blur">
+  <section class="border-primary-100 relative border-y bg-surface/60 py-12 backdrop-blur">
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <dl class="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
         <div v-reveal class="text-center">
@@ -77,7 +77,7 @@ const SECTORS = [
           <span
             v-for="(s, i) in [...SECTORS, ...SECTORS]"
             :key="`${s}-${i}`"
-            class="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-[13px] font-semibold whitespace-nowrap text-gray-500"
+            class="rounded-full border border-gray-200 bg-surface px-4 py-1.5 text-[13px] font-semibold whitespace-nowrap text-gray-500"
           >
             {{ s }}
           </span>

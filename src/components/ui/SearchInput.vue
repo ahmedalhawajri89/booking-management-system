@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref } from 'vue'
 import { Search, X } from 'lucide-vue-next'
 
@@ -26,7 +26,7 @@ defineExpose({ focus: () => input.value?.focus() })
       :value="modelValue"
       :placeholder="placeholder"
       :aria-label="placeholder"
-      class="focus:border-primary-400 h-10 w-full rounded-[var(--radius-md)] border border-gray-200 bg-white ps-9 pe-9 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none"
+      class="focus:border-primary-400 h-10 w-full rounded-[var(--radius-md)] border border-gray-200 bg-surface ps-9 pe-9 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none"
       @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     />
     <button

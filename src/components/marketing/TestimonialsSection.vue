@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Quote } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
 
@@ -44,7 +44,7 @@ const CASES = [
           v-for="(c, i) in CASES"
           :key="c.sector"
           v-reveal="i * 110"
-          class="hover:border-primary-200 flex flex-col rounded-[var(--radius-xl)] border border-gray-200 bg-white p-6 transition-colors"
+          class="hover:border-primary-200 flex flex-col rounded-[var(--radius-xl)] border border-gray-200 bg-surface p-6 transition-colors"
         >
           <Quote class="text-primary-300 mb-4 h-6 w-6" aria-hidden="true" />
           <blockquote class="flex-1 text-[15px] leading-relaxed text-gray-700">

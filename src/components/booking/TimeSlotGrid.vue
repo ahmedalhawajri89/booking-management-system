@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { CalendarX2 } from 'lucide-vue-next'
 import type { Slot } from '@/types'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -46,7 +46,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
         modelValue === slot.startAt
           ? 'border-primary-600 bg-primary-600 text-white'
           : slot.state === 'available'
-            ? 'hover:border-primary-300 hover:bg-primary-50 border-gray-200 bg-white text-gray-700'
+            ? 'hover:border-primary-300 hover:bg-primary-50 border-gray-200 bg-surface text-gray-700'
             : 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300 line-through',
       ]"
       @click="emit('update:modelValue', slot.startAt)"

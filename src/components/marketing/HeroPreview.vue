@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { CheckCircle2, Clock, TriangleAlert } from 'lucide-vue-next'
 
@@ -114,7 +114,7 @@ const nowLabel = computed(() => label(nowMin.value))
   <div class="relative py-9">
     <!-- board -->
     <div
-      class="elev-modal relative overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-white"
+      class="elev-modal relative overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-surface"
     >
       <header class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
         <div>
@@ -187,7 +187,7 @@ const nowLabel = computed(() => label(nowMin.value))
 
     <!-- floating proof cards, anchored to the board -->
     <div
-      class="elev-overlay absolute top-1.5 hidden items-center gap-2 rounded-[var(--radius-lg)] border border-gray-200 bg-white px-2.5 py-1.5 sm:flex"
+      class="elev-overlay absolute top-1.5 hidden items-center gap-2 rounded-[var(--radius-lg)] border border-gray-200 bg-surface px-2.5 py-1.5 sm:flex"
       style="inset-inline-start: 20px"
     >
       <span
@@ -202,7 +202,7 @@ const nowLabel = computed(() => label(nowMin.value))
     </div>
 
     <div
-      class="elev-overlay absolute bottom-1.5 hidden items-center gap-2 rounded-[var(--radius-lg)] border border-gray-200 bg-white px-2.5 py-1.5 sm:flex"
+      class="elev-overlay absolute bottom-1.5 hidden items-center gap-2 rounded-[var(--radius-lg)] border border-gray-200 bg-surface px-2.5 py-1.5 sm:flex"
       style="inset-inline-end: 20px"
     >
       <span

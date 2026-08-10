@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ArrowLeft, PhoneOff, CalendarX2, NotebookPen, UserX } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
 import type { LucideIcon } from '@/types'
@@ -43,7 +43,7 @@ const ROWS: { icon: LucideIcon; pain: string; fix: string }[] = [
           v-for="(row, i) in ROWS"
           :key="row.pain"
           v-reveal="i * 90"
-          class="hover:border-primary-200 grid items-center gap-4 rounded-[var(--radius-lg)] border border-gray-200 bg-white p-5 transition-colors md:grid-cols-[auto_1fr_auto_1fr] md:gap-6"
+          class="hover:border-primary-200 grid items-center gap-4 rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-5 transition-colors md:grid-cols-[auto_1fr_auto_1fr] md:gap-6"
         >
           <span
             class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-gray-100 text-gray-500"

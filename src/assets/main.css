@@ -69,6 +69,26 @@
   /* --- gradient: guest surfaces only --- */
   --gradient-sunset: linear-gradient(135deg, #fbbf24 0%, #f97316 32%, #f43f5e 68%, #ec4899 100%);
   --gradient-sunset-soft: linear-gradient(135deg, #fff8f1 0%, #fff1f2 55%, #fdf2f8 100%);
+
+  /* --- semantic roles: the public API of the theme ---------------------
+     Everything above is a primitive; everything here is a *role*. New code
+     reaches for these, not for gray-200 or white, so re-skinning the product
+     is an edit to this block rather than a sweep across 43 files.
+     Registering them in @theme generates bg-surface / text-fg /
+     border-border as real utilities. */
+  --color-canvas: #fbfaf9;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #f6f4f2;
+  --color-surface-inverse: #221c18;
+  --color-border: #eae6e2;
+  --color-border-strong: #d9d3cd;
+  --color-fg: #221c18;
+  --color-fg-muted: #64594f;
+  --color-fg-subtle: #857a72;
+  --color-fg-on-primary: #ffffff;
+  --color-overlay: rgb(28 20 14 / 0.45);
+  --color-ring: #f97316;
 }
 
 @layer base {
@@ -79,12 +99,12 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-gray-50 font-sans text-gray-900 antialiased;
+    @apply bg-canvas text-fg font-sans antialiased;
   }
 
   /* One focus ring, everywhere, never removed. */
   :focus-visible {
-    outline: 2px solid var(--color-primary-500);
+    outline: 2px solid var(--color-ring);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
@@ -105,7 +125,7 @@
 @layer utilities {
   /* --- elevation: four levels, warm-tinted, border-first --------------- */
   .elev-flat {
-    @apply border border-gray-200 bg-white;
+    @apply border-border bg-surface border;
   }
   .elev-raised {
     box-shadow: 0 1px 2px rgb(28 20 14 / 0.06);
@@ -119,10 +139,10 @@
 
   /* --- operator density ------------------------------------------------ */
   .surface {
-    @apply rounded-[var(--radius-lg)] border border-gray-200 bg-white;
+    @apply border-border bg-surface rounded-[var(--radius-lg)] border;
   }
   .surface-sunken {
-    @apply bg-gray-100;
+    @apply bg-surface-sunken;
   }
 
   /* --- guest-only brand expression ------------------------------------- */
@@ -138,7 +158,7 @@
   }
   .ring-sunset {
     background:
-      linear-gradient(#fff, #fff) padding-box,
+      linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
       var(--gradient-sunset) border-box;
     @apply border border-transparent;
   }

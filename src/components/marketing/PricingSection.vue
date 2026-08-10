@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Check, Minus } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
@@ -61,7 +61,7 @@ const price = computed(() => (p: Plan) => {
 </script>
 
 <template>
-  <section id="pricing" class="section bg-white">
+  <section id="pricing" class="section bg-surface">
     <div class="section-inner">
       <SectionHeading
         eyebrow="الأسعار"
@@ -85,7 +85,7 @@ const price = computed(() => (p: Plan) => {
           @click="yearly = !yearly"
         >
           <span
-            class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all duration-300"
+            class="absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-all duration-300"
             :style="{ insetInlineStart: yearly ? 'calc(100% - 1.375rem)' : '0.125rem' }"
           />
         </button>
@@ -102,7 +102,7 @@ const price = computed(() => (p: Plan) => {
           v-for="(p, i) in PLANS"
           :key="p.name"
           v-reveal="i * 100"
-          class="relative rounded-[var(--radius-xl)] border bg-white p-6 transition-all"
+          class="relative rounded-[var(--radius-xl)] border bg-surface p-6 transition-all"
           :class="
             p.featured
               ? 'border-primary-300 elev-overlay md:-mt-4 md:pb-8'

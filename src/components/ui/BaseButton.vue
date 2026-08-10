@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import { Loader2 } from 'lucide-vue-next'
 import type { LucideIcon } from '@/types'
@@ -28,9 +28,9 @@ const props = withDefaults(
 const VARIANT = {
   primary:
     'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 border-transparent',
-  secondary: 'bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 border-gray-200',
+  secondary: 'bg-surface text-gray-700 hover:bg-gray-50 active:bg-gray-100 border-gray-200',
   ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 active:bg-gray-200 border-transparent',
-  danger: 'bg-white text-danger-700 hover:bg-danger-50 active:bg-danger-100 border-danger-700/25',
+  danger: 'bg-surface text-danger-700 hover:bg-danger-50 active:bg-danger-100 border-danger-700/25',
 } as const
 
 const SIZE = {

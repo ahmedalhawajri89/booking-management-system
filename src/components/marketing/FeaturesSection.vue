@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import {
   BellRing,
   CalendarDays,
@@ -74,7 +74,7 @@ const REST: Item[] = [
 </script>
 
 <template>
-  <section id="features" class="section bg-white">
+  <section id="features" class="section bg-surface">
     <div class="section-inner">
       <SectionHeading
         eyebrow="القدرات"
@@ -88,7 +88,7 @@ const REST: Item[] = [
           :key="item.title"
           v-reveal="i * 100"
           :class="item.span"
-          class="group hover:border-primary-200 relative overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-gray-50 p-6 transition-all hover:bg-white md:p-7"
+          class="group hover:border-primary-200 relative overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-gray-50 p-6 transition-all hover:bg-surface md:p-7"
         >
           <div
             class="mesh-sunset pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -109,7 +109,7 @@ const REST: Item[] = [
           v-for="(item, i) in REST"
           :key="item.title"
           v-reveal="200 + i * 70"
-          class="hover:border-primary-200 rounded-[var(--radius-lg)] border border-gray-200 bg-white p-5 transition-colors md:col-span-2"
+          class="hover:border-primary-200 rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-5 transition-colors md:col-span-2"
         >
           <span
             class="bg-primary-50 text-primary-600 mb-3 inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)]"

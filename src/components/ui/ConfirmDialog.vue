@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
 import BaseButton from './BaseButton.vue'
 
@@ -45,7 +45,7 @@ function onKeydown(e: KeyboardEvent) {
           role="alertdialog"
           aria-modal="true"
           :aria-label="title"
-          class="elev-modal animate-pop-in w-full max-w-sm rounded-[var(--radius-xl)] bg-white p-5"
+          class="elev-modal animate-pop-in w-full max-w-sm rounded-[var(--radius-xl)] bg-surface p-5"
         >
           <h2 class="text-base font-bold text-gray-900">{{ title }}</h2>
           <p class="mt-2 text-sm leading-relaxed text-gray-600">{{ message }}</p>

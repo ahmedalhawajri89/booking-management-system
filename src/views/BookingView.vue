@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { startOfDay } from 'date-fns'
 import { ArrowLeft, ArrowRight, Check, Copy, Phone, User } from 'lucide-vue-next'
@@ -164,7 +164,7 @@ const STEPS = ['الخدمة', 'الموعد', 'بياناتك']
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <header class="sticky top-0 z-20 border-b border-gray-200 bg-white/95 backdrop-blur">
+    <header class="sticky top-0 z-20 border-b border-gray-200 bg-surface/95 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
         <AppLogo compact />
         <RouterLink to="/" class="text-sm font-semibold text-gray-500 hover:text-gray-900">

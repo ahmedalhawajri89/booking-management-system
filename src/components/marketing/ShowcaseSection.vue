@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref } from 'vue'
 import { CalendarDays, ListChecks, PanelRightOpen, Sun } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
@@ -35,7 +35,7 @@ const TONE: Record<string, string> = {
 </script>
 
 <template>
-  <section class="section bg-white">
+  <section class="section bg-surface">
     <div class="section-inner">
       <SectionHeading
         eyebrow="جولة سريعة"
@@ -59,7 +59,7 @@ const TONE: Record<string, string> = {
           :class="
             active === t.key
               ? 'border-primary-600 bg-primary-600 text-white'
-              : 'hover:border-primary-300 hover:text-primary-700 border-gray-200 bg-white text-gray-600'
+              : 'hover:border-primary-300 hover:text-primary-700 border-gray-200 bg-surface text-gray-600'
           "
           class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
           @click="active = t.key"
@@ -74,7 +74,7 @@ const TONE: Record<string, string> = {
         v-reveal.scale="80"
         class="elev-overlay overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-gray-50"
       >
-        <div class="flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-3">
+        <div class="flex items-center gap-2 border-b border-gray-200 bg-surface px-4 py-3">
           <span class="h-2.5 w-2.5 rounded-full bg-gray-200" />
           <span class="h-2.5 w-2.5 rounded-full bg-gray-200" />
           <span class="h-2.5 w-2.5 rounded-full bg-gray-200" />
@@ -92,11 +92,11 @@ const TONE: Record<string, string> = {
                     <div
                       v-for="n in 3"
                       :key="n"
-                      class="border-warning-100 h-8 rounded-[var(--radius-md)] border bg-white"
+                      class="border-warning-100 h-8 rounded-[var(--radius-md)] border bg-surface"
                     />
                   </div>
                 </div>
-                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-white p-3">
+                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-3">
                   <p class="mb-2 text-[13px] font-bold text-gray-900">جدول اليوم</p>
                   <div class="space-y-2">
                     <div
@@ -112,13 +112,13 @@ const TONE: Record<string, string> = {
                 </div>
               </div>
               <div class="space-y-3">
-                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-white p-3">
+                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-3">
                   <p class="mb-2 text-[13px] font-bold text-gray-900">التالي</p>
                   <div class="space-y-1.5">
                     <div v-for="n in 3" :key="n" class="h-7 rounded bg-gray-100" />
                   </div>
                 </div>
-                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-white p-3">
+                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-3">
                   <p class="mb-2 text-[13px] font-bold text-gray-900">نبض اليوم</p>
                   <div class="mb-2 h-2 overflow-hidden rounded-full bg-gray-100">
                     <div class="bg-primary-500 h-full w-[63%] rounded-full" />
@@ -131,7 +131,7 @@ const TONE: Record<string, string> = {
             <!-- CALENDAR -->
             <div
               v-else-if="active === 'calendar'"
-              class="rounded-[var(--radius-lg)] border border-gray-200 bg-white p-4"
+              class="rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-4"
             >
               <div class="mb-3 flex items-center justify-between">
                 <p class="text-[13px] font-bold text-gray-900">الأحد ٩ أغسطس</p>
@@ -171,13 +171,13 @@ const TONE: Record<string, string> = {
                 <span
                   v-for="l in ['اليوم', 'بانتظار التأكيد', 'غير مدفوع', 'يحتاج إجراء']"
                   :key="l"
-                  class="rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] text-gray-500"
+                  class="rounded-full border border-gray-200 bg-surface px-3 py-1 text-[11px] text-gray-500"
                 >
                   {{ l }}
                 </span>
               </div>
               <div
-                class="divide-y divide-gray-200 rounded-[var(--radius-lg)] border border-gray-200 bg-white"
+                class="divide-y divide-gray-200 rounded-[var(--radius-lg)] border border-gray-200 bg-surface"
               >
                 <div v-for="r in ROWS" :key="r.name" class="flex items-center gap-3 px-3 py-2.5">
                   <span class="w-16 text-[11px] font-bold text-gray-900" data-numeric>١٠:٠٠ ص</span>
@@ -200,7 +200,7 @@ const TONE: Record<string, string> = {
             <!-- DETAIL -->
             <div
               v-else
-              class="mx-auto max-w-sm rounded-[var(--radius-lg)] border border-gray-200 bg-white"
+              class="mx-auto max-w-sm rounded-[var(--radius-lg)] border border-gray-200 bg-surface"
             >
               <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
                 <span class="text-[13px] font-bold text-gray-900" dir="ltr">BK-2026-0431</span>

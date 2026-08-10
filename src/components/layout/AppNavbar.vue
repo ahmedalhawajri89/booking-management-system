@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, X } from 'lucide-vue-next'
@@ -24,7 +24,7 @@ const LINKS = [
 </script>
 
 <template>
-  <nav class="border-primary-100/70 fixed top-0 z-50 w-full border-b bg-white/80 backdrop-blur-xl">
+  <nav class="border-primary-100/70 fixed top-0 z-50 w-full border-b bg-surface/80 backdrop-blur-xl">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between sm:h-20">
         <AppLogo />
@@ -70,7 +70,7 @@ const LINKS = [
     </div>
 
     <Transition name="fade">
-      <div v-if="open" id="mobile-menu" class="border-t border-gray-200 bg-white md:hidden">
+      <div v-if="open" id="mobile-menu" class="border-t border-gray-200 bg-surface md:hidden">
         <div class="space-y-1 px-4 py-3">
           <a
             v-for="l in LINKS"

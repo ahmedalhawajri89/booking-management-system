@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import { addDays, format, isSameDay, startOfDay } from 'date-fns'
 import { ar } from 'date-fns/locale'
@@ -55,7 +55,7 @@ function onKey(e: KeyboardEvent, index: number) {
       :class="
         isSameDay(d, modelValue)
           ? 'border-primary-600 bg-primary-600 text-white'
-          : 'hover:border-primary-300 hover:bg-primary-50 border-gray-200 bg-white text-gray-700'
+          : 'hover:border-primary-300 hover:bg-primary-50 border-gray-200 bg-surface text-gray-700'
       "
       @click="emit('update:modelValue', d)"
       @keydown="onKey($event, i)"

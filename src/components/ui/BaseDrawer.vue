@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { X } from 'lucide-vue-next'
 import IconButton from './IconButton.vue'
@@ -87,7 +87,7 @@ onBeforeUnmount(() => {
         role="dialog"
         aria-modal="true"
         :aria-label="title"
-        class="elev-modal inset-inline-end-0 fixed inset-y-0 z-50 flex w-full flex-col bg-white sm:w-[480px]"
+        class="elev-modal inset-inline-end-0 fixed inset-y-0 z-50 flex w-full flex-col bg-surface sm:w-[480px]"
         :class="width === 'lg' && 'sm:w-[560px]'"
         style="inset-inline-end: 0"
       >
@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
 
         <footer
           v-if="$slots.footer"
-          class="sticky bottom-0 border-t border-gray-200 bg-white px-5 py-3"
+          class="sticky bottom-0 border-t border-gray-200 bg-surface px-5 py-3"
         >
           <slot name="footer" />
         </footer>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, useId } from 'vue'
 import type { LucideIcon } from '@/types'
 
@@ -56,7 +56,7 @@ const describedBy = computed(
         :rows="rows"
         :aria-invalid="error ? true : undefined"
         :aria-describedby="describedBy"
-        class="focus:border-primary-400 w-full resize-none rounded-[var(--radius-md)] border bg-white px-3 py-2.5 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
+        class="focus:border-primary-400 w-full resize-none rounded-[var(--radius-md)] border bg-surface px-3 py-2.5 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
         :class="error ? 'border-danger-700/50' : 'border-gray-200'"
         @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
       />
@@ -72,7 +72,7 @@ const describedBy = computed(
         :dir="ltr ? 'ltr' : undefined"
         :aria-invalid="error ? true : undefined"
         :aria-describedby="describedBy"
-        class="focus:border-primary-400 h-10 w-full rounded-[var(--radius-md)] border bg-white px-3 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
+        class="focus:border-primary-400 h-10 w-full rounded-[var(--radius-md)] border bg-surface px-3 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
         :class="[
           error ? 'border-danger-700/50' : 'border-gray-200',
           icon && 'ps-9',

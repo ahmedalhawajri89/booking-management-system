@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref } from 'vue'
 import { Plus } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
@@ -47,7 +47,7 @@ function toggle(i: number) {
 
       <div
         v-reveal
-        class="divide-primary-100 border-primary-100 divide-y overflow-hidden rounded-[var(--radius-xl)] border bg-white"
+        class="divide-primary-100 border-primary-100 divide-y overflow-hidden rounded-[var(--radius-xl)] border bg-surface"
       >
         <div v-for="(item, i) in FAQ" :key="item.q">
           <h3>

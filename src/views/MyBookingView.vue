@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { CalendarClock, SearchX } from 'lucide-vue-next'
@@ -62,7 +62,7 @@ function cancel() {
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <header class="border-b border-gray-200 bg-white">
+    <header class="border-b border-gray-200 bg-surface">
       <div class="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
         <AppLogo compact />
         <RouterLink to="/" class="text-sm font-semibold text-gray-500 hover:text-gray-900">

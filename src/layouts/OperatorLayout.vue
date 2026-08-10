@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import {
@@ -123,7 +123,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
     <!-- Rail: labels ≥lg, icons ≥md, bottom tabs below md -->
     <aside
-      class="fixed bottom-0 z-30 flex w-full shrink-0 border-t border-gray-200 bg-white md:sticky md:top-0 md:h-screen md:w-16 md:flex-col md:border-e md:border-t-0 md:border-gray-200 lg:w-60"
+      class="fixed bottom-0 z-30 flex w-full shrink-0 border-t border-gray-200 bg-surface md:sticky md:top-0 md:h-screen md:w-16 md:flex-col md:border-e md:border-t-0 md:border-gray-200 lg:w-60"
     >
       <div class="hidden h-16 items-center px-4 md:flex lg:px-5">
         <AppLogo compact />
@@ -163,7 +163,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
     <!-- Main column -->
     <div class="flex min-w-0 flex-1 flex-col pb-16 md:pb-0">
       <header
-        class="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-gray-200 bg-white/95 px-4 backdrop-blur sm:gap-3 lg:px-6"
+        class="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-gray-200 bg-surface/95 px-4 backdrop-blur sm:gap-3 lg:px-6"
       >
         <p class="hidden min-w-0 truncate text-sm font-semibold text-gray-500 lg:block">
           {{ fullDate(new Date()) }}

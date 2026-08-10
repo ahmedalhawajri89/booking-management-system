@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { CalendarDays, CheckCircle2, ClipboardCheck, MousePointerClick } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
@@ -81,7 +81,7 @@ onBeforeUnmount(() => io?.disconnect())
         <div class="order-2 hidden lg:order-1 lg:block">
           <div class="sticky top-28">
             <div
-              class="elev-overlay relative overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-white p-8"
+              class="elev-overlay relative overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-surface p-8"
             >
               <div class="mb-6 flex items-center gap-2">
                 <span
@@ -122,7 +122,7 @@ onBeforeUnmount(() => io?.disconnect())
             :key="s.title"
             :ref="(el) => setRef(el as Element | null, i)"
             v-reveal
-            class="rounded-[var(--radius-lg)] border bg-white p-5 transition-all duration-500 lg:border-0 lg:bg-transparent lg:p-0"
+            class="rounded-[var(--radius-lg)] border bg-surface p-5 transition-all duration-500 lg:border-0 lg:bg-transparent lg:p-0"
             :class="[
               i === active ? 'border-primary-200' : 'border-gray-200',
               'lg:opacity-100',
@@ -135,7 +135,7 @@ onBeforeUnmount(() => io?.disconnect())
                 :class="
                   i === active
                     ? 'bg-primary-600 text-white'
-                    : 'border-2 border-gray-200 bg-white text-gray-400'
+                    : 'border-2 border-gray-200 bg-surface text-gray-400'
                 "
                 data-numeric
               >
