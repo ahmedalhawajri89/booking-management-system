@@ -20,11 +20,14 @@ const TABS: { key: Key; label: string; icon: LucideIcon; note: string }[] = [
 
 const active = ref<Key>('today')
 
+// A salon, deliberately: the hero board is a clinic with its own cast. Reusing
+// one set of names made two unrelated panels on the same page look like the
+// same screenshot pasted twice.
 const ROWS = [
-  { name: 'أحمد سعيد', service: 'استشارة طبية', tone: 'success', status: 'مكتمل' },
-  { name: 'سارة خالد', service: 'قص وتصفيف', tone: 'info', status: 'مؤكد' },
-  { name: 'نورة القحطاني', service: 'استشارة طبية', tone: 'warning', status: 'بانتظار' },
-  { name: 'خالد الحربي', service: 'حجز طاولة', tone: 'info', status: 'مؤكد' },
+  { name: 'دانة العتيبي', service: 'صبغة وعناية', tone: 'success', status: 'مكتمل' },
+  { name: 'سلمى الحارثي', service: 'قص وتصفيف', tone: 'info', status: 'مؤكد' },
+  { name: 'وجدان الشهري', service: 'مكياج مناسبات', tone: 'warning', status: 'بانتظار' },
+  { name: 'أروى القرني', service: 'عناية بالأظافر', tone: 'info', status: 'مؤكد' },
 ]
 
 const TONE: Record<string, string> = {
@@ -35,12 +38,16 @@ const TONE: Record<string, string> = {
 </script>
 
 <template>
-  <section class="section bg-surface">
-    <div class="section-inner">
+  <!-- The one dark band in the middle of a light page. It gives the product
+       screens a lit-stage quality, and it breaks a run of pale sections that
+       otherwise blur into one another. -->
+  <section class="section bg-surface-inverse mesh-brand grain overflow-hidden">
+    <div class="section-inner relative">
       <SectionHeading
         eyebrow="جولة سريعة"
         title="أربع شاشات تغطي يوم عمل كامل"
         lede="اختر شاشة لتراها — كل ما يظهر هنا موجود في النسخة التجريبية."
+        tone="inverse"
       />
 
       <!-- tabs -->
@@ -58,10 +65,10 @@ const TONE: Record<string, string> = {
           :aria-selected="active === t.key"
           :class="
             active === t.key
-              ? 'border-primary-600 bg-primary-600 text-white'
-              : 'hover:border-primary-300 hover:text-primary-700 border-gray-200 bg-surface text-gray-600'
+              ? 'border-transparent bg-white text-gray-900'
+              : 'border-white/20 text-white/70 hover:border-white/40 hover:text-white'
           "
-          class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
+          class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold backdrop-blur transition-colors"
           @click="active = t.key"
         >
           <component :is="t.icon" class="h-4 w-4" aria-hidden="true" />
@@ -243,7 +250,7 @@ const TONE: Record<string, string> = {
         </Transition>
       </div>
 
-      <p v-reveal class="mt-4 text-center text-[13px] text-gray-500">
+      <p v-reveal class="mt-4 text-center text-[13px] text-white/60">
         {{ TABS.find((t) => t.key === active)?.note }}
       </p>
     </div>

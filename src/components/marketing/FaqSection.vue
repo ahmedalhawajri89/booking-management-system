@@ -1,13 +1,19 @@
-﻿<script setup lang="ts">
-import { ref } from 'vue'
+<script setup lang="ts">
 import { Plus } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
 
-/** Accessible accordion: real buttons, `aria-expanded`, `aria-controls`,
- *  and a height transition driven by grid-template-rows so it animates
- *  smoothly without hardcoding a max-height. */
-const open = ref<number | null>(0)
-
+/**
+ * Native <details>/<summary>, not a hand-rolled accordion.
+ *
+ * The browser already gives us the button semantics, the expanded state, and
+ * — the part that actually matters — in-page find. Ctrl+F for a term inside a
+ * collapsed answer opens it; a div with aria-expanded cannot do that, and an
+ * FAQ is exactly the content people search rather than read.
+ *
+ * `name` makes them mutually exclusive without a line of JS. Where it is
+ * unsupported the panels simply all open independently, which is a fine
+ * fallback.
+ */
 const FAQ = [
   {
     q: 'هل أحتاج خبرة تقنية لتشغيله؟',
@@ -34,52 +40,40 @@ const FAQ = [
     a: 'نعم، صُمّمت من الأساس بالعربية واتجاه RTL — التواريخ والأرقام والعملة تُنسَّق عربياً، وحقول الجوال والبريد تحتفظ باتجاهها اللاتيني الصحيح.',
   },
 ]
-
-function toggle(i: number) {
-  open.value = open.value === i ? null : i
-}
 </script>
 
 <template>
-  <section class="section bg-brand-soft grain">
-    <div class="section-inner max-w-3xl!">
-      <SectionHeading eyebrow="أسئلة شائعة" title="ما يسأل عنه الناس عادةً" />
+  <section class="section bg-surface-sunken">
+    <div class="section-inner grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16">
+      <SectionHeading
+        eyebrow="أسئلة شائعة"
+        title="ما يسأل عنه الناس عادةً"
+        lede="وإن لم تجد سؤالك، النسخة التجريبية مفتوحة بلا تسجيل."
+        align="start"
+        sticky
+      />
 
-      <div
-        v-reveal
-        class="divide-primary-100 border-primary-100 divide-y overflow-hidden rounded-[var(--radius-xl)] border bg-surface"
-      >
-        <div v-for="(item, i) in FAQ" :key="item.q">
-          <h3>
-            <button
-              :id="`faq-btn-${i}`"
-              type="button"
-              class="hover:bg-primary-50/50 flex w-full items-center justify-between gap-4 px-5 py-4 text-start transition-colors"
-              :aria-expanded="open === i"
-              :aria-controls="`faq-panel-${i}`"
-              @click="toggle(i)"
-            >
-              <span class="text-[15px] font-bold text-gray-900">{{ item.q }}</span>
-              <Plus
-                class="text-primary-600 h-4 w-4 shrink-0 transition-transform duration-300"
-                :class="open === i && 'rotate-45'"
-                aria-hidden="true"
-              />
-            </button>
-          </h3>
-          <div
-            :id="`faq-panel-${i}`"
-            role="region"
-            :aria-labelledby="`faq-btn-${i}`"
-            class="grid transition-[grid-template-rows] duration-300 ease-out"
-            :style="{ gridTemplateRows: open === i ? '1fr' : '0fr' }"
+      <div v-reveal class="border-border bg-surface divide-border divide-y rounded-[var(--radius-xl)] border">
+        <details v-for="item in FAQ" :key="item.q" name="faq" class="group">
+          <summary
+            class="hover:bg-surface-sunken flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 transition-colors"
           >
-            <div class="overflow-hidden">
-              <p class="px-5 pb-4 text-[15px] leading-relaxed text-gray-600">{{ item.a }}</p>
-            </div>
-          </div>
-        </div>
+            <span class="text-fg text-[15px] font-bold">{{ item.q }}</span>
+            <Plus
+              class="text-primary-600 h-4 w-4 shrink-0 transition-transform duration-300 group-open:rotate-45"
+              aria-hidden="true"
+            />
+          </summary>
+          <p class="text-fg-muted px-5 pb-4 text-[15px] leading-relaxed">{{ item.a }}</p>
+        </details>
       </div>
     </div>
   </section>
 </template>
+
+<style scoped>
+/* Safari still paints its own disclosure triangle without this. */
+summary::-webkit-details-marker {
+  display: none;
+}
+</style>

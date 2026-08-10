@@ -36,8 +36,8 @@ useFocusTrap(toRef(props, 'open'), panel, () => emit('close'))
         role="dialog"
         aria-modal="true"
         :aria-label="title"
-        class="elev-modal inset-inline-end-0 fixed inset-y-0 z-50 flex w-full flex-col bg-surface sm:w-[480px]"
-        :class="width === 'lg' && 'sm:w-[560px]'"
+        class="elev-modal inset-inline-end-0 bg-surface fixed inset-y-0 z-50 flex w-full flex-col"
+        :class="width === 'lg' ? 'sm:w-[560px]' : 'sm:w-[480px]'"
         style="inset-inline-end: 0"
       >
         <header class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">

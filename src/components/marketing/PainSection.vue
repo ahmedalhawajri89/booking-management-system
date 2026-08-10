@@ -1,10 +1,16 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ArrowLeft, PhoneOff, CalendarX2, NotebookPen, UserX } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
 import type { LucideIcon } from '@/types'
 
-/** Before/after, stated plainly. Each pain maps to one specific mechanism —
- *  no claim appears here that the product cannot actually deliver. */
+/**
+ * Split layout: the header holds still on one side while the pains scroll
+ * past on the other. The problem statement stays in view for as long as the
+ * evidence for it does, which a centred header cannot do.
+ *
+ * Each pain maps to one specific mechanism — no claim appears here that the
+ * product cannot actually deliver.
+ */
 const ROWS: { icon: LucideIcon; pain: string; fix: string }[] = [
   {
     icon: PhoneOff,
@@ -30,34 +36,42 @@ const ROWS: { icon: LucideIcon; pain: string; fix: string }[] = [
 </script>
 
 <template>
-  <section class="section">
-    <div class="section-inner">
+  <section class="section bg-surface-sunken">
+    <div class="section-inner grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16">
       <SectionHeading
         eyebrow="المشكلة"
         title="إدارة المواعيد ليست جدولاً — بل قرارات صغيرة كثيرة"
-        lede="كل صف هنا مشكلة يومية حقيقية، وأمامها الآلية التي يعالجها بها النظام."
+        lede="كل بند هنا مشكلة يومية حقيقية، وتحته الآلية التي يعالجها بها النظام."
+        align="start"
+        sticky
       />
 
-      <ul class="space-y-3">
+      <ul class="space-y-4">
         <li
           v-for="(row, i) in ROWS"
           :key="row.pain"
           v-reveal="i * 90"
-          class="hover:border-primary-200 grid items-center gap-4 rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-5 transition-colors md:grid-cols-[auto_1fr_auto_1fr] md:gap-6"
+          class="border-border bg-surface rounded-[var(--radius-lg)] border p-5 md:p-6"
         >
-          <span
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-gray-100 text-gray-500"
-          >
-            <component :is="row.icon" class="h-5 w-5" aria-hidden="true" />
-          </span>
+          <div class="flex items-start gap-3">
+            <span
+              class="bg-surface-sunken text-fg-subtle flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)]"
+            >
+              <component :is="row.icon" class="h-4.5 w-4.5" aria-hidden="true" />
+            </span>
+            <p class="text-fg-subtle decoration-border pt-1.5 text-[15px] leading-relaxed line-through">
+              {{ row.pain }}
+            </p>
+          </div>
 
-          <p class="text-[15px] leading-relaxed text-gray-500 line-through decoration-gray-300">
-            {{ row.pain }}
-          </p>
-
-          <ArrowLeft class="text-primary-400 hidden h-4 w-4 shrink-0 md:block" aria-hidden="true" />
-
-          <p class="text-[15px] leading-relaxed font-semibold text-gray-900">{{ row.fix }}</p>
+          <div class="mt-4 flex items-start gap-3">
+            <span
+              class="bg-primary-50 text-primary-600 flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)]"
+            >
+              <ArrowLeft class="h-4.5 w-4.5" aria-hidden="true" />
+            </span>
+            <p class="text-fg pt-1.5 text-[15px] leading-relaxed font-semibold">{{ row.fix }}</p>
+          </div>
         </li>
       </ul>
     </div>

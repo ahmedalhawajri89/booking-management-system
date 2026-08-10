@@ -18,11 +18,21 @@ import FinalCta from '@/components/marketing/FinalCta.vue'
  * hook → proof → problem → capability → see it → how → who → price → doubts → act.
  * Each section is its own component so the story can be re-ordered without
  * touching markup.
+ *
+ * Two rules hold the sequence together, and both are enforced by reading the
+ * sections in order rather than by any code:
+ *   1. No two adjacent sections share a background.
+ *      inverse → canvas → sunken → canvas → inverse → canvas → sunken →
+ *      canvas → sunken → canvas
+ *   2. No two adjacent sections share a layout. Split, bento, dark tour,
+ *      timeline, editorial, matrix, disclosure — one shape each.
+ * The previous build broke both, which is why it read as one card repeated
+ * down the page.
  */
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="bg-canvas min-h-screen">
     <ScrollProgress />
     <AppNavbar />
 
