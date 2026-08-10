@@ -1,5 +1,10 @@
 # Booking Management System
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20the%20app-2563EB?style=for-the-badge&logo=vercel&logoColor=white)](https://booking-management-system-xi.vercel.app/)
+
+**Live demo — [booking-management-system-xi.vercel.app](https://booking-management-system-xi.vercel.app/)**
+No sign-up needed. The public site is the customer flow; open `/app` for the operator console.
+
 An Arabic-first appointment booking system: customers book a service online without creating an account, and the business manages the whole day from one console.
 
 Built as a complete product rather than a screen mockup — the availability logic, conflict detection and status workflow are all real.
@@ -105,7 +110,9 @@ Licensed under the MIT License.
 
 ## نبذة بالعربية
 
-نظام حجز مواعيد عربي بالكامل. الزبون يحجز خدمة أونلاين بدون إنشاء حساب ويستلم رقماً مرجعياً، وصاحب النشاط يدير يومه كامل من لوحة واحدة.
+**تجربة حيّة:** [booking-management-system-xi.vercel.app](https://booking-management-system-xi.vercel.app/) — بدون تسجيل. الصفحة العامة هي رحلة الزبون، و`/app` لوحة صاحب النشاط.
+
+نظام حجز مواعيد عربي بالكامل. الزبون يحجز خدمة أونلاين بدون إنشاء حساب ويستلم رقم مرجعي، وصاحب النشاط يدير يومه كامل من لوحة واحدة.
 
 **الجزء المهم في المشروع** ليس الشكل، بل المنطق: المواعيد المتاحة تُحسب لحظياً من مدة الخدمة والفاصل الزمني بين المواعيد وساعات العمل، والتعارض يُكتشف بتداخل الفترات نصف المفتوحة — فموعد ينتهي 10:00 وآخر يبدأ 10:00 لا يتعارضان، بينما أي تداخل حقيقي يُرفض. النتيجة أن المورد لا يمكن حجزه مرتين.
 
