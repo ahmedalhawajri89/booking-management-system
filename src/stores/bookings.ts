@@ -114,8 +114,26 @@ export const useBookingsStore = defineStore('bookings', () => {
 
   const occupancyToday = computed(() => occupancyFor(new Date(), today.value, businessHours))
 
+  /**
+   * Built once per change instead of scanning on every call.
+   *
+   * CustomersView calls forCustomer() from inside a v-for, and a function call
+   * in a template re-runs on every render — so a linear scan there was O(n·m)
+   * per paint. The customer drawer and the analytics screen want the same
+   * index, so it lives here rather than in the view.
+   */
+  const byCustomer = computed(() => {
+    const m = new Map<string, Booking[]>()
+    for (const b of sorted.value) {
+      const list = m.get(b.customerId)
+      if (list) list.push(b)
+      else m.set(b.customerId, [b])
+    }
+    return m
+  })
+
   function forCustomer(customerId: string): Booking[] {
-    return sorted.value.filter((b) => b.customerId === customerId)
+    return byCustomer.value.get(customerId) ?? []
   }
 
   /* ------------------------------------------------------------- actions */
@@ -210,16 +228,30 @@ export const useBookingsStore = defineStore('bookings', () => {
     persist()
   }
 
-  function reschedule(id: string, startAt: string): void {
+  /**
+   * Returns false and writes nothing if the new slot is taken.
+   *
+   * Until now the only thing stopping a double-booking here was that
+   * TimeSlotGrid does not offer occupied slots — correct for the one path
+   * that exists, but the store would happily write an overlap for any caller
+   * that skipped the grid. The rule belongs with the data, not with one form.
+   */
+  function reschedule(id: string, startAt: string): boolean {
     const b = byId(id)
-    if (!b) return
+    if (!b) return false
     const service = serviceById(b.serviceId)
-    if (!service) return
+    if (!service) return false
+
     const start = new Date(startAt)
-    b.startAt = start.toISOString()
-    b.endAt = addMinutes(start, service.durationMin + service.bufferMin).toISOString()
+    const end = addMinutes(start, service.durationMin + service.bufferMin)
+    const candidate: Booking = { ...b, startAt: start.toISOString(), endAt: end.toISOString() }
+    if (hasConflict(candidate, items.value)) return false
+
+    b.startAt = candidate.startAt
+    b.endAt = candidate.endAt
     appendEvent(b, 'rescheduled', 'أُعيدت جدولة الحجز')
     persist()
+    return true
   }
 
   function addNote(id: string, note: string): void {
@@ -253,6 +285,7 @@ export const useBookingsStore = defineStore('bookings', () => {
     conflicts,
     attention,
     occupancyToday,
+    byCustomer,
     forCustomer,
     create,
     setStatus,

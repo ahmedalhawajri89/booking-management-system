@@ -104,7 +104,12 @@ async function submit() {
   try {
     const customer = customers.upsert({ name: name.value, phone: phone.value })
     if (props.rescheduleId) {
-      bookings.reschedule(props.rescheduleId, startAt.value!)
+      // The grid does not offer taken slots, so this only fires if the slot
+      // was claimed between the grid rendering and this submit.
+      if (!bookings.reschedule(props.rescheduleId, startAt.value!)) {
+        toast.error('هذا الوقت لم يعد متاحاً — اختر وقتاً آخر')
+        return
+      }
       toast.success('تمت إعادة الجدولة')
       emit('close')
       return

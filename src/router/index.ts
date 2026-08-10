@@ -58,6 +58,12 @@ const router = createRouter({
           meta: { title: 'التقويم' },
         },
         {
+          path: 'analytics',
+          name: 'analytics',
+          component: () => import('@/views/app/AnalyticsView.vue'),
+          meta: { title: 'التحليلات' },
+        },
+        {
           path: 'bookings',
           name: 'bookings',
           component: () => import('@/views/app/BookingsView.vue'),
@@ -77,8 +83,9 @@ const router = createRouter({
         },
       ],
     },
-    /* legacy link from the previous build */
-    { path: '/dashboard', redirect: '/app' },
+    /* legacy link from the previous build — it meant "the numbers screen",
+       which now exists, so send it there rather than to Today */
+    { path: '/dashboard', redirect: '/app/analytics' },
 
     /* A wrong URL is told it is wrong — never silently redirected. */
     {

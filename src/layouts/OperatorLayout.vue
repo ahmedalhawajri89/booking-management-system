@@ -2,6 +2,7 @@
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import {
+  BarChart3,
   CalendarDays,
   ListChecks,
   LogOut,
@@ -15,6 +16,8 @@ import AppLogo from '@/components/ui/AppLogo.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import SearchInput from '@/components/ui/SearchInput.vue'
 import IconButton from '@/components/ui/IconButton.vue'
+import BaseAvatar from '@/components/ui/BaseAvatar.vue'
+import BaseMenu, { type MenuItem } from '@/components/ui/BaseMenu.vue'
 import BookingFormDrawer from '@/components/booking/BookingFormDrawer.vue'
 import BookingDetailDrawer from '@/components/booking/BookingDetailDrawer.vue'
 import { useBookingsStore } from '@/stores/bookings'
@@ -33,8 +36,21 @@ const NAV = [
   { to: '/app/calendar', label: 'التقويم', icon: CalendarDays },
   { to: '/app/bookings', label: 'الحجوزات', icon: ListChecks },
   { to: '/app/customers', label: 'العملاء', icon: Users },
+  { to: '/app/analytics', label: 'التحليلات', icon: BarChart3 },
   { to: '/app/settings', label: 'الإعدادات', icon: Settings },
 ] as const
+
+/**
+ * Six is one too many for the bottom bar on a phone, so these two live in the
+ * account menu there instead of being crushed to unreadable widths.
+ */
+const PHONE_HIDDEN: ReadonlySet<string> = new Set(['/app/analytics', '/app/settings'])
+
+const ACCOUNT_ITEMS: MenuItem[] = [
+  { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
+  { value: 'settings', label: 'الإعدادات', icon: Settings },
+  { value: 'signout', label: 'تسجيل الخروج', icon: LogOut, tone: 'danger', separated: true },
+]
 
 const query = ref('')
 const createOpen = ref(false)
@@ -87,6 +103,11 @@ function signOut() {
   void router.push('/')
 }
 
+function onAccountSelect(value: string) {
+  if (value === 'signout') return signOut()
+  void router.push(value === 'settings' ? '/app/settings' : '/app/analytics')
+}
+
 /** Global shortcuts: `/` focuses search, `n` opens the create drawer. */
 function onKeydown(e: KeyboardEvent) {
   const target = e.target as HTMLElement | null
@@ -135,12 +156,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
           :key="item.to"
           :to="item.to"
           :aria-current="isActive(item.to) ? 'page' : undefined"
-          class="flex flex-1 flex-col items-center gap-0.5 rounded-[var(--radius-md)] px-2 py-2 text-[11px] font-semibold transition-colors md:flex-none md:flex-row md:gap-3 md:px-3 md:py-2.5 md:text-sm"
-          :class="
+          class="flex-1 flex-col items-center gap-0.5 rounded-[var(--radius-md)] px-2 py-2 text-[11px] font-semibold transition-colors md:flex-none md:flex-row md:gap-3 md:px-3 md:py-2.5 md:text-sm"
+          :class="[
             isActive(item.to)
               ? 'bg-primary-50 text-primary-700'
-              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
-          "
+              : 'text-fg-subtle hover:bg-surface-sunken hover:text-fg',
+            PHONE_HIDDEN.has(item.to) ? 'hidden md:flex' : 'flex',
+          ]"
         >
           <component :is="item.icon" class="h-5 w-5 shrink-0" aria-hidden="true" />
           <span class="md:hidden lg:inline">{{ item.label }}</span>
@@ -148,10 +170,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
         </RouterLink>
       </nav>
 
-      <div class="hidden border-t border-gray-200 p-2 md:block">
+      <div class="border-border hidden border-t p-2 md:block">
         <button
           type="button"
-          class="hover:bg-danger-50 hover:text-danger-700 flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-semibold text-gray-500 transition-colors"
+          class="hover:bg-danger-50 hover:text-danger-700 text-fg-subtle flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-semibold transition-colors"
           @click="signOut"
         >
           <LogOut class="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -204,6 +226,23 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
             @click="createOpen = true"
           />
         </span>
+
+        <!-- The only way out of the session on a phone: the rail's sign-out
+             button is hidden below md, which used to leave mobile users with
+             no way to log out at all. -->
+        <BaseMenu :items="ACCOUNT_ITEMS" label="قائمة الحساب" @select="onAccountSelect">
+          <template #trigger="{ open }">
+            <button
+              type="button"
+              class="focus-visible:ring-ring shrink-0 rounded-full transition-opacity hover:opacity-80"
+              :aria-expanded="open"
+              aria-haspopup="menu"
+              :aria-label="`الحساب: ${auth.user?.name ?? 'المشغّل'}`"
+            >
+              <BaseAvatar :name="auth.user?.name ?? 'المشغّل'" size="sm" />
+            </button>
+          </template>
+        </BaseMenu>
       </header>
 
       <main id="main" class="flex-1">
