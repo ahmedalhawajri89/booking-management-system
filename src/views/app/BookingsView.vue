@@ -1,15 +1,19 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { isSameDay, isWithinInterval, startOfDay, addDays } from 'date-fns'
-import { CalendarPlus, SearchX } from 'lucide-vue-next'
+import { isSameDay, isWithinInterval, startOfDay, addDays, format } from 'date-fns'
+import { ArrowDown, ArrowUp, CalendarPlus, Download, SearchX } from 'lucide-vue-next'
 import type { Booking, BookingStatus } from '@/types'
 import { useBookingsStore } from '@/stores/bookings'
 import { useCustomersStore } from '@/stores/customers'
-import { services } from '@/data/catalog'
-import { BOOKING_STATUS } from '@/lib/status'
+import { services, serviceById } from '@/data/catalog'
+import { BOOKING_STATUS, PAYMENT_STATUS } from '@/lib/status'
+import { downloadCsv, type Column } from '@/lib/export'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import ErrorState from '@/components/ui/ErrorState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BookingRow from '@/components/booking/BookingRow.vue'
 
 const emit = defineEmits<{ openBooking: [id: string] }>()
@@ -19,11 +23,18 @@ const store = useBookingsStore()
 const customers = useCustomersStore()
 
 type QuickFilter = 'all' | 'today' | 'week' | 'pending' | 'unpaid' | 'attention'
+type SortKey = 'time' | 'customer' | 'status' | 'price'
 
 const query = ref('')
 const quick = ref<QuickFilter>('all')
 const status = ref<BookingStatus | 'all'>('all')
 const serviceId = ref<string | 'all'>('all')
+const sortKey = ref<SortKey>('time')
+const sortDesc = ref(false)
+const page = ref(1)
+
+/** Large enough that most operators never paginate, small enough to stay fast. */
+const PAGE_SIZE = 50
 
 const QUICK: { value: QuickFilter; label: string }[] = [
   { value: 'all', label: 'الكل' },
@@ -32,6 +43,13 @@ const QUICK: { value: QuickFilter; label: string }[] = [
   { value: 'pending', label: 'بانتظار التأكيد' },
   { value: 'unpaid', label: 'غير مدفوع' },
   { value: 'attention', label: 'يحتاج إجراء' },
+]
+
+const SORTS: { value: SortKey; label: string }[] = [
+  { value: 'time', label: 'الموعد' },
+  { value: 'customer', label: 'العميل' },
+  { value: 'status', label: 'الحالة' },
+  { value: 'price', label: 'المبلغ' },
 ]
 
 onMounted(() => {
@@ -46,6 +64,10 @@ watch(
     if (q.filter === 'attention') quick.value = 'attention'
   },
 )
+
+// Any change to what is being shown resets the page, or you end up looking at
+// an empty page 4 of a 12-result list.
+watch([query, quick, status, serviceId, sortKey, sortDesc], () => (page.value = 1))
 
 const attentionIds = computed(() => new Set(store.attention.map((a) => a.booking.id)))
 
@@ -82,7 +104,7 @@ function matchesQuery(b: Booking): boolean {
   )
 }
 
-const results = computed(() =>
+const filtered = computed(() =>
   store.sorted.filter(
     (b) =>
       matchesQuick(b) &&
@@ -90,6 +112,47 @@ const results = computed(() =>
       (status.value === 'all' || b.status === status.value) &&
       (serviceId.value === 'all' || b.serviceId === serviceId.value),
   ),
+)
+
+// Status sorts by workflow order, not alphabetically: "pending" before
+// "completed" is what an operator means by sorting on status.
+const STATUS_ORDER: Record<BookingStatus, number> = {
+  pending: 0,
+  confirmed: 1,
+  completed: 2,
+  no_show: 3,
+  cancelled: 4,
+}
+
+const results = computed(() => {
+  const rows = [...filtered.value]
+  rows.sort((a, b) => {
+    let d = 0
+    switch (sortKey.value) {
+      case 'customer':
+        d = (customers.byId(a.customerId)?.name ?? '').localeCompare(
+          customers.byId(b.customerId)?.name ?? '',
+          'ar',
+        )
+        break
+      case 'status':
+        d = STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
+        break
+      case 'price':
+        d = a.priceMinor - b.priceMinor
+        break
+      default:
+        d = a.startAt.localeCompare(b.startAt)
+    }
+    // Ties fall back to time, so the order is stable and predictable.
+    return (d || a.startAt.localeCompare(b.startAt)) * (sortDesc.value ? -1 : 1)
+  })
+  return rows
+})
+
+const pageCount = computed(() => Math.max(1, Math.ceil(results.value.length / PAGE_SIZE)))
+const paged = computed(() =>
+  results.value.slice((page.value - 1) * PAGE_SIZE, page.value * PAGE_SIZE),
 )
 
 const hasFilters = computed(
@@ -106,16 +169,53 @@ function clearAll() {
   status.value = 'all'
   serviceId.value = 'all'
 }
+
+function toggleSort(key: SortKey) {
+  if (sortKey.value === key) sortDesc.value = !sortDesc.value
+  else {
+    sortKey.value = key
+    sortDesc.value = false
+  }
+}
+
+/** Exports what is on screen after filtering — not the current page, and not
+ *  the whole table. What you filtered to is what you meant. */
+function exportCsv() {
+  const columns: Column<Booking>[] = [
+    { header: 'المرجع', value: (b) => b.reference },
+    { header: 'التاريخ', value: (b) => format(new Date(b.startAt), 'yyyy-MM-dd') },
+    { header: 'من', value: (b) => format(new Date(b.startAt), 'HH:mm') },
+    { header: 'إلى', value: (b) => format(new Date(b.endAt), 'HH:mm') },
+    { header: 'العميل', value: (b) => customers.byId(b.customerId)?.name ?? '' },
+    { header: 'الجوال', value: (b) => customers.byId(b.customerId)?.phone ?? '' },
+    { header: 'الخدمة', value: (b) => serviceById(b.serviceId)?.name ?? '' },
+    { header: 'الحالة', value: (b) => BOOKING_STATUS[b.status].label },
+    { header: 'الدفع', value: (b) => PAYMENT_STATUS[b.paymentStatus].label },
+    { header: 'المبلغ', value: (b) => (b.priceMinor / 100).toFixed(2) },
+    { header: 'ملاحظات', value: (b) => b.notes ?? '' },
+  ]
+  downloadCsv(`bookings-${format(new Date(), 'yyyy-MM-dd')}`, results.value, columns)
+}
 </script>
 
 <template>
   <div class="mx-auto max-w-7xl p-4 lg:p-6">
     <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-xl font-bold text-gray-900">الحجوزات</h1>
-      <p class="text-sm text-gray-500">
-        <span data-numeric>{{ results.length }}</span> من
-        <span data-numeric>{{ store.items.length }}</span>
-      </p>
+      <h1 class="type-h3 text-fg">الحجوزات</h1>
+      <div class="flex items-center gap-3">
+        <p class="text-fg-subtle text-sm">
+          <span data-numeric>{{ results.length }}</span> من
+          <span data-numeric>{{ store.items.length }}</span>
+        </p>
+        <BaseButton
+          size="sm"
+          :icon="Download"
+          :disabled="results.length === 0"
+          @click="exportCsv"
+        >
+          تصدير
+        </BaseButton>
+      </div>
     </header>
 
     <!-- filters -->
@@ -130,7 +230,7 @@ function clearAll() {
           :class="
             quick === f.value
               ? 'border-primary-600 bg-primary-600 text-white'
-              : 'hover:border-primary-300 hover:text-primary-700 border-gray-200 bg-surface text-gray-600'
+              : 'hover:border-primary-300 hover:text-primary-700 border-border bg-surface text-fg-muted'
           "
           @click="quick = f.value"
         >
@@ -138,33 +238,62 @@ function clearAll() {
         </button>
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <label class="sr-only" for="f-status">الحالة</label>
-        <select
-          id="f-status"
+      <div class="flex flex-wrap items-end gap-2">
+        <BaseSelect
           v-model="status"
-          class="focus:border-primary-400 h-9 rounded-[var(--radius-md)] border border-gray-200 bg-surface px-2.5 text-sm text-gray-700 focus:outline-none"
-        >
-          <option value="all">كل الحالات</option>
-          <option v-for="(meta, key) in BOOKING_STATUS" :key="key" :value="key">
-            {{ meta.label }}
-          </option>
-        </select>
-
-        <label class="sr-only" for="f-service">الخدمة</label>
-        <select
-          id="f-service"
+          label="الحالة"
+          hide-label
+          size="sm"
+          :options="[
+            { value: 'all', label: 'كل الحالات' },
+            ...Object.entries(BOOKING_STATUS).map(([k, m]) => ({ value: k, label: m.label })),
+          ]"
+        />
+        <BaseSelect
           v-model="serviceId"
-          class="focus:border-primary-400 h-9 rounded-[var(--radius-md)] border border-gray-200 bg-surface px-2.5 text-sm text-gray-700 focus:outline-none"
-        >
-          <option value="all">كل الخدمات</option>
-          <option v-for="s in services" :key="s.id" :value="s.id">{{ s.name }}</option>
-        </select>
+          label="الخدمة"
+          hide-label
+          size="sm"
+          :options="[
+            { value: 'all', label: 'كل الخدمات' },
+            ...services.map((s) => ({ value: s.id, label: s.name })),
+          ]"
+        />
+
+        <!-- Sort as buttons rather than table headers: below `sm` the rows are
+             cards with no header row to click. -->
+        <div class="flex items-center gap-1" role="group" aria-label="الترتيب">
+          <span class="text-fg-subtle me-1 text-xs font-semibold">ترتيب:</span>
+          <button
+            v-for="s in SORTS"
+            :key="s.value"
+            type="button"
+            :aria-pressed="sortKey === s.value"
+            class="inline-flex h-9 items-center gap-1 rounded-[var(--radius-md)] border px-2.5 text-xs font-semibold transition-colors"
+            :class="
+              sortKey === s.value
+                ? 'border-primary-300 bg-primary-50 text-primary-700'
+                : 'border-border bg-surface text-fg-muted hover:border-primary-300'
+            "
+            @click="toggleSort(s.value)"
+          >
+            {{ s.label }}
+            <component
+              :is="sortDesc ? ArrowDown : ArrowUp"
+              v-if="sortKey === s.value"
+              class="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
+            <span v-if="sortKey === s.value" class="sr-only">
+              {{ sortDesc ? '— تنازلي' : '— تصاعدي' }}
+            </span>
+          </button>
+        </div>
 
         <button
           v-if="hasFilters"
           type="button"
-          class="h-9 rounded-[var(--radius-md)] px-2.5 text-sm font-semibold text-gray-500 hover:text-gray-900"
+          class="text-fg-subtle hover:text-fg h-9 rounded-[var(--radius-md)] px-2.5 text-sm font-semibold"
           @click="clearAll"
         >
           مسح المرشّحات
@@ -174,7 +303,9 @@ function clearAll() {
 
     <!-- results -->
     <div class="surface overflow-hidden">
-      <div v-if="store.isLoading && !store.loaded" class="p-4">
+      <ErrorState v-if="store.error" :message="store.error" @retry="store.load(true)" />
+
+      <div v-else-if="store.isLoading && !store.loaded" class="p-4">
         <SkeletonBlock variant="row" :count="6" />
       </div>
 
@@ -196,7 +327,7 @@ function clearAll() {
 
       <div v-else role="list">
         <BookingRow
-          v-for="b in results"
+          v-for="b in paged"
           :key="b.id"
           :booking="b"
           show-day
@@ -204,5 +335,18 @@ function clearAll() {
         />
       </div>
     </div>
+
+    <nav
+      v-if="pageCount > 1"
+      class="mt-4 flex items-center justify-between gap-3"
+      aria-label="تنقّل الصفحات"
+    >
+      <BaseButton size="sm" :disabled="page === 1" @click="page -= 1">السابق</BaseButton>
+      <p class="text-fg-subtle text-sm">
+        صفحة <span data-numeric>{{ page }}</span> من
+        <span data-numeric>{{ pageCount }}</span>
+      </p>
+      <BaseButton size="sm" :disabled="page === pageCount" @click="page += 1">التالي</BaseButton>
+    </nav>
   </div>
 </template>

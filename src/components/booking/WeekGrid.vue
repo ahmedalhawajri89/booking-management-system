@@ -1,0 +1,186 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { addDays, differenceInMinutes, isSameDay, set, startOfDay } from 'date-fns'
+import type { Booking } from '@/types'
+import { useBookingsStore } from '@/stores/bookings'
+import { businessHours } from '@/data/catalog'
+import { hoursFor } from '@/lib/availability'
+import { time } from '@/lib/format'
+import { BOOKING_STATUS } from '@/lib/status'
+
+/**
+ * Seven days side by side, sharing one hour rail.
+ *
+ * Deliberately the same proportional geometry as DayTimeline — free time is
+ * empty space — but at a third of the scale, because a week only has to
+ * answer "which days are full", not "what is at 10:20". Anything needing that
+ * detail is one click away in the day view.
+ */
+const props = defineProps<{ start: Date; bookings: Booking[] }>()
+defineEmits<{ open: [id: string]; pickDay: [date: Date] }>()
+
+const store = useBookingsStore()
+const PX_PER_MIN = 0.5
+
+const days = computed(() => Array.from({ length: 7 }, (_, i) => addDays(startOfDay(props.start), i)))
+
+/**
+ * One rail for all seven columns, so blocks line up across days. Taking the
+ * widest opening hours of the week means a day that opens early is not
+ * clipped, and a day that closes early just has empty space at the bottom —
+ * which is true.
+ */
+const bounds = computed(() => {
+  let openMin = 24 * 60
+  let closeMin = 0
+  for (const d of days.value) {
+    const h = hoursFor(businessHours, d)
+    if (!h || h.isClosed) continue
+    const [oh, om] = h.open.split(':').map(Number)
+    const [ch, cm] = h.close.split(':').map(Number)
+    openMin = Math.min(openMin, (oh ?? 0) * 60 + (om ?? 0))
+    closeMin = Math.max(closeMin, (ch ?? 0) * 60 + (cm ?? 0))
+  }
+  if (closeMin <= openMin) return null
+  return { openMin, closeMin, totalMin: closeMin - openMin }
+})
+
+const ticks = computed(() => {
+  const b = bounds.value
+  if (!b) return []
+  const out: { label: string; top: number }[] = []
+  for (let m = b.openMin; m <= b.closeMin; m += 60) {
+    out.push({
+      label: time(set(startOfDay(new Date()), { hours: Math.floor(m / 60), minutes: m % 60 })),
+      top: (m - b.openMin) * PX_PER_MIN,
+    })
+  }
+  return out
+})
+
+function blocksFor(day: Date) {
+  const b = bounds.value
+  if (!b) return []
+  const dayOpen = set(startOfDay(day), {
+    hours: Math.floor(b.openMin / 60),
+    minutes: b.openMin % 60,
+  })
+  return props.bookings
+    .filter((bk) => bk.status !== 'cancelled' && isSameDay(new Date(bk.startAt), day))
+    .map((bk) => ({
+      booking: bk,
+      view: store.hydrate(bk),
+      top: Math.max(0, differenceInMinutes(new Date(bk.startAt), dayOpen)) * PX_PER_MIN,
+      height: Math.max(
+        14,
+        differenceInMinutes(new Date(bk.endAt), new Date(bk.startAt)) * PX_PER_MIN,
+      ),
+    }))
+}
+
+function isClosed(day: Date): boolean {
+  const h = hoursFor(businessHours, day)
+  return !h || h.isClosed
+}
+
+const TONE: Record<string, string> = {
+  success: 'border-success-700/30 bg-success-50 text-success-700',
+  warning: 'border-warning-700/30 bg-warning-50 text-warning-700',
+  danger: 'border-danger-700/30 bg-danger-50 text-danger-700',
+  info: 'border-info-700/30 bg-info-50 text-info-700',
+  neutral: 'border-border-strong bg-surface-sunken text-fg-muted',
+  muted: 'border-border bg-surface-sunken text-fg-subtle',
+}
+
+const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+</script>
+
+<template>
+  <p v-if="!bounds" class="text-fg-subtle px-4 py-10 text-center text-sm">
+    لا ساعات عمل في هذا الأسبوع.
+  </p>
+
+  <div v-else class="overflow-x-auto">
+    <div class="min-w-[46rem]">
+      <!-- day headers -->
+      <div class="grid" style="grid-template-columns: 3.5rem repeat(7, minmax(0, 1fr))">
+        <span />
+        <button
+          v-for="d in days"
+          :key="d.toISOString()"
+          type="button"
+          class="hover:bg-surface-sunken rounded-[var(--radius-sm)] px-1 py-1.5 text-center transition-colors"
+          @click="$emit('pickDay', d)"
+        >
+          <span
+            class="block text-[11px] font-semibold"
+            :class="isSameDay(d, new Date()) ? 'text-primary-600' : 'text-fg-subtle'"
+          >
+            {{ DAY_NAMES[d.getDay()] }}
+          </span>
+          <span
+            class="block text-sm font-bold"
+            :class="isSameDay(d, new Date()) ? 'text-primary-700' : 'text-fg'"
+            data-numeric
+          >
+            {{ d.getDate() }}
+          </span>
+        </button>
+      </div>
+
+      <div
+        class="relative mt-2 grid"
+        style="grid-template-columns: 3.5rem repeat(7, minmax(0, 1fr))"
+        :style="{ height: `${bounds.totalMin * PX_PER_MIN + 12}px` }"
+      >
+        <!-- shared hour rail -->
+        <div class="relative">
+          <span
+            v-for="t in ticks"
+            :key="t.label"
+            class="text-fg-subtle absolute text-[10px]"
+            :style="{ top: `${t.top - 6}px`, insetInlineStart: 0 }"
+            data-numeric
+          >
+            {{ t.label }}
+          </span>
+        </div>
+
+        <div
+          v-for="d in days"
+          :key="d.toISOString()"
+          class="border-border relative border-s"
+          :class="isClosed(d) && 'bg-surface-sunken'"
+        >
+          <span
+            v-for="t in ticks"
+            :key="t.label"
+            class="bg-border absolute inset-x-0 h-px"
+            :style="{ top: `${t.top}px` }"
+            aria-hidden="true"
+          />
+
+          <button
+            v-for="b in blocksFor(d)"
+            :key="b.booking.id"
+            type="button"
+            class="hover:elev-raised absolute z-10 overflow-hidden rounded-[var(--radius-sm)] border px-1 text-start transition-shadow"
+            :class="TONE[BOOKING_STATUS[b.booking.status].tone]"
+            :style="{
+              top: `${b.top}px`,
+              height: `${b.height}px`,
+              insetInlineStart: '2px',
+              insetInlineEnd: '2px',
+            }"
+            :title="`${b.view.customer?.name} · ${b.view.service?.name}`"
+            @click="$emit('open', b.booking.id)"
+          >
+            <span class="block truncate text-[10px] font-bold leading-[14px]">
+              {{ b.view.customer?.name }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
