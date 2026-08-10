@@ -17,6 +17,7 @@ import '@fontsource/ibm-plex-sans-arabic/latin-600.css'
 import '@fontsource/ibm-plex-sans-arabic/latin-700.css'
 
 import './assets/main.css'
+import { initRepository } from './data/repository'
 
 const app = createApp(App)
 
@@ -24,4 +25,9 @@ app.use(createPinia())
 app.use(router)
 app.directive('reveal', vReveal)
 
-app.mount('#app')
+// Resolve the backend before the first screen renders, so no store can start
+// reading from localStorage and then find itself talking to Postgres.
+//
+// .then rather than top-level await: that would raise the build target above
+// the browsers this is compiled for, to save one line here.
+void initRepository().finally(() => app.mount('#app'))

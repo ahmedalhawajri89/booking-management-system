@@ -6,7 +6,7 @@ import type { BusinessHours, Resource } from '@/types'
 import { businessHours, resources, services, type ServiceRow } from '@/data/catalog'
 import { duration, money } from '@/lib/format'
 import { SERVICE_ICON_KEYS, SERVICE_ICON_LABELS, iconFor } from '@/lib/icons'
-import { repository } from '@/data/repository'
+import { isDemoBackend, repository } from '@/data/repository'
 import { useBookingsStore } from '@/stores/bookings'
 import { useCustomersStore } from '@/stores/customers'
 import { useSettingsStore } from '@/stores/settings'
@@ -289,13 +289,18 @@ async function resetData() {
     <section v-else class="surface p-4">
       <h2 class="text-fg text-sm font-bold">الحساب</h2>
       <p class="text-fg-muted mt-1 text-sm">{{ auth.user?.email ?? 'غير مسجّل' }}</p>
-      <div class="border-border mt-4 border-t pt-4">
+      <!-- Only on the demo backend. Against a real database this button would
+           not reset a browser, it would wipe a business. -->
+      <div v-if="isDemoBackend" class="border-border mt-4 border-t pt-4">
         <p class="text-fg-subtle mb-2 text-xs">
           البيانات محفوظة محلياً في هذا المتصفح. إعادة التعيين تعيد بيانات العرض التجريبية
           <strong>وإعدادات الخدمات وساعات العمل</strong> إلى حالتها الأولى.
         </p>
         <BaseButton :icon="RotateCcw" @click="resetData">إعادة تعيين البيانات</BaseButton>
       </div>
+      <p v-else class="border-border text-fg-subtle mt-4 border-t pt-4 text-xs">
+        البيانات محفوظة على خادم قاعدة البيانات.
+      </p>
     </section>
 
     <!-- --------------------------------------------------- service modal -->
