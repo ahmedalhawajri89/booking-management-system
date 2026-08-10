@@ -281,10 +281,33 @@ html[dir='ltr'] .drawer-leave-to {
   animation: float-y 5.5s ease-in-out infinite;
 }
 
+/* The sweep travels with the reading direction, so it reads as "filling in"
+   rather than unwinding. The RTL override below flips it. */
 @keyframes shimmer {
-  100% {
+  from {
+    transform: translateX(100%);
+  }
+  to {
     transform: translateX(-100%);
   }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-surface) 50%,
+    transparent
+  );
+  opacity: 0.65;
+  animation: shimmer 1.6s infinite;
 }
 html[dir='rtl'] .skeleton::after {
   animation-direction: reverse;

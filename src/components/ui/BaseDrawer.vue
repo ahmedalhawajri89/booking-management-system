@@ -1,12 +1,12 @@
 ﻿<script setup lang="ts">
-import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { ref, toRef } from 'vue'
 import { X } from 'lucide-vue-next'
 import IconButton from './IconButton.vue'
+import { useFocusTrap } from '@/composables/useFocusTrap'
 
 /**
  * Side sheet used for every detail and create surface, so the operator never
- * loses their place. Traps focus, closes on Escape, restores focus on close,
- * and becomes a full-screen sheet below `sm`.
+ * loses their place. Becomes a full-screen sheet below `sm`.
  */
 const props = withDefaults(
   defineProps<{ open: boolean; title: string; subtitle?: string; width?: 'md' | 'lg' }>(),
@@ -16,58 +16,7 @@ const props = withDefaults(
 const emit = defineEmits<{ close: [] }>()
 
 const panel = ref<HTMLElement | null>(null)
-let lastFocused: HTMLElement | null = null
-
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
-function onKeydown(e: KeyboardEvent) {
-  if (!props.open) return
-
-  if (e.key === 'Escape') {
-    e.stopPropagation()
-    emit('close')
-    return
-  }
-
-  if (e.key !== 'Tab' || !panel.value) return
-  const nodes = Array.from(panel.value.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-    (el) => el.offsetParent !== null,
-  )
-  if (nodes.length === 0) return
-
-  const first = nodes[0]!
-  const last = nodes[nodes.length - 1]!
-  if (e.shiftKey && document.activeElement === first) {
-    e.preventDefault()
-    last.focus()
-  } else if (!e.shiftKey && document.activeElement === last) {
-    e.preventDefault()
-    first.focus()
-  }
-}
-
-watch(
-  () => props.open,
-  async (open) => {
-    if (open) {
-      lastFocused = document.activeElement as HTMLElement | null
-      document.body.style.overflow = 'hidden'
-      document.addEventListener('keydown', onKeydown)
-      await nextTick()
-      panel.value?.querySelector<HTMLElement>(FOCUSABLE)?.focus()
-    } else {
-      document.body.style.overflow = ''
-      document.removeEventListener('keydown', onKeydown)
-      lastFocused?.focus()
-    }
-  },
-)
-
-onBeforeUnmount(() => {
-  document.body.style.overflow = ''
-  document.removeEventListener('keydown', onKeydown)
-})
+useFocusTrap(toRef(props, 'open'), panel, () => emit('close'))
 </script>
 
 <template>
