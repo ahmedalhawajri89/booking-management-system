@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Calendar } from 'lucide-vue-next'
 
 withDefaults(defineProps<{ compact?: boolean }>(), { compact: false })
@@ -7,7 +7,7 @@ withDefaults(defineProps<{ compact?: boolean }>(), { compact: false })
 <template>
   <RouterLink to="/" class="flex items-center gap-2">
     <div
-      class="bg-sunset shadow-primary-500/25 rounded-xl text-white shadow-lg"
+      class="bg-brand shadow-primary-500/25 rounded-xl text-white shadow-lg"
       :class="compact ? 'p-1.5' : 'p-2.5'"
     >
       <Calendar :class="compact ? 'h-5 w-5' : 'h-6 w-6'" />

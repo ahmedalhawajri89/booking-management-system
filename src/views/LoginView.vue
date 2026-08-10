@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Lock, Mail } from 'lucide-vue-next'
@@ -39,7 +39,7 @@ async function submit() {
 
 <template>
   <div
-    class="mesh-sunset relative flex min-h-screen items-center justify-center overflow-hidden p-4"
+    class="mesh-brand relative flex min-h-screen items-center justify-center overflow-hidden p-4"
   >
     <div class="relative z-10 w-full max-w-sm">
       <div class="mb-6 flex justify-center">

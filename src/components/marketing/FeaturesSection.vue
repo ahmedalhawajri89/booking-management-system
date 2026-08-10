@@ -91,12 +91,12 @@ const REST: Item[] = [
           class="group hover:border-primary-200 relative overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-gray-50 p-6 transition-all hover:bg-surface md:p-7"
         >
           <div
-            class="mesh-sunset pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            class="mesh-brand pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
             aria-hidden="true"
           />
           <div class="relative">
             <span
-              class="bg-sunset shadow-primary-500/25 mb-5 inline-flex h-11 w-11 items-center justify-center rounded-[var(--radius-lg)] text-white shadow-md"
+              class="bg-brand shadow-primary-500/25 mb-5 inline-flex h-11 w-11 items-center justify-center rounded-[var(--radius-lg)] text-white shadow-md"
             >
               <component :is="item.icon" class="h-5 w-5" aria-hidden="true" />
             </span>

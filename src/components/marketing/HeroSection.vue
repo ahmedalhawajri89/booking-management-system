@@ -46,7 +46,7 @@ onBeforeUnmount(() => {
   <section class="relative overflow-hidden pt-24 pb-16 sm:pt-28 md:pt-32 md:pb-24">
     <!-- background planes -->
     <div
-      class="mesh-sunset grain pointer-events-none absolute inset-0 -z-10"
+      class="mesh-brand grain pointer-events-none absolute inset-0 -z-10"
       :style="{ transform: `translateY(${parallax * 0.5}px)` }"
       aria-hidden="true"
     />
@@ -62,13 +62,13 @@ onBeforeUnmount(() => {
         <div class="text-center lg:text-start">
           <p
             v-reveal
-            class="ring-sunset mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-bold shadow-sm"
+            class="ring-brand mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-bold shadow-sm"
           >
             <CalendarCheck class="text-primary-600 h-3.5 w-3.5" aria-hidden="true" />
             <span class="text-gradient">نظام حجوزات عربي بالكامل</span>
           </p>
 
-          <h1 v-reveal="80" class="display-xl mb-5 text-gray-900">
+          <h1 v-reveal="80" class="type-display mb-5 text-gray-900">
             جدولك اليوم
             <br class="hidden sm:block" />
             <!-- pb keeps Arabic descenders inside the clipping box -->
@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
             </span>
           </h1>
 
-          <p v-reveal="160" class="lede mx-auto mb-8 max-w-xl lg:mx-0">
+          <p v-reveal="160" class="type-lede mx-auto mb-8 max-w-xl lg:mx-0">
             نظام يعرف ساعات عملك ومدة كل خدمة، فيمنع الحجز المزدوج قبل حدوثه — ويعطيك لوحة تريك ما
             يحتاج تدخّلك اليوم، لا مجرد أرقام.
           </p>
@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
           <div v-reveal="240" class="flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
             <RouterLink
               to="/book"
-              class="btn-sunset group inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-bold sm:w-auto"
+              class="btn-brand group inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-bold sm:w-auto"
             >
               جرّب الحجز الآن
               <ArrowLeft class="h-4 w-4 transition-transform group-hover:-translate-x-1" />

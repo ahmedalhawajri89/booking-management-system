@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ArrowLeft, Sparkles } from 'lucide-vue-next'
 </script>
 
@@ -7,7 +7,7 @@ import { ArrowLeft, Sparkles } from 'lucide-vue-next'
     <div class="section-inner">
       <div
         v-reveal.scale
-        class="bg-sunset grain relative overflow-hidden rounded-[var(--radius-xl)] px-6 py-14 text-center sm:px-10 md:py-20"
+        class="bg-brand grain relative overflow-hidden rounded-[var(--radius-xl)] px-6 py-14 text-center sm:px-10 md:py-20"
       >
         <div
           class="pointer-events-none absolute inset-0 opacity-25"
@@ -27,7 +27,7 @@ import { ArrowLeft, Sparkles } from 'lucide-vue-next'
             جاهز خلال دقائق
           </span>
 
-          <h2 class="display-lg mx-auto mb-4 max-w-2xl text-white">دع جدولك يدير نفسه</h2>
+          <h2 class="type-h1 mx-auto mb-4 max-w-2xl text-white">دع جدولك يدير نفسه</h2>
           <p class="mx-auto mb-8 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">
             جرّب النظام كاملاً ببيانات جاهزة — أنشئ حجزاً، أكّده، وشاهد كيف يمنع التعارض قبل حدوثه.
           </p>

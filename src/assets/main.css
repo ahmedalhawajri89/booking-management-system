@@ -1,44 +1,45 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
-   Operator — design tokens
-   Two surfaces, one system: guest screens are warm and spacious, operator
-   screens are neutral and dense. See docs/DESIGN_SYSTEM.md.
+   Design tokens
+   A neutral, modern SaaS identity: indigo brand, cyan accent, slate
+   neutrals. See docs/DESIGN_SYSTEM.md.
    ========================================================================== */
 @theme {
-  /* --- primitives: brand (orange) --- */
-  --color-primary-50: #fff8f1;
-  --color-primary-100: #ffedd5;
-  --color-primary-200: #fed7aa;
-  --color-primary-300: #fdba74;
-  --color-primary-400: #fb923c;
-  --color-primary-500: #f97316;
-  --color-primary-600: #ea580c;
-  --color-primary-700: #c2410c;
-  --color-primary-800: #9a3412;
-  --color-primary-900: #7c2d12;
+  /* --- primitives: brand (indigo) --- */
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+  --color-primary-950: #1e1b4b;
 
-  /* --- primitives: accent (rose) --- */
-  --color-accent-50: #fff1f2;
-  --color-accent-100: #ffe4e6;
-  --color-accent-200: #fecdd3;
-  --color-accent-400: #fb7185;
-  --color-accent-500: #f43f5e;
-  --color-accent-600: #e11d48;
-  --color-accent-700: #be123c;
-  --color-accent-900: #881337;
+  /* --- primitives: accent (cyan) --- */
+  --color-accent-50: #ecfeff;
+  --color-accent-100: #cffafe;
+  --color-accent-200: #a5f3fc;
+  --color-accent-400: #22d3ee;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+  --color-accent-700: #0e7490;
+  --color-accent-900: #164e63;
 
-  /* --- primitives: warm neutrals (replaces Tailwind's cool grey) --- */
-  --color-gray-50: #fbfaf9;
-  --color-gray-100: #f6f4f2;
-  --color-gray-200: #eae6e2;
-  --color-gray-300: #d9d3cd;
-  --color-gray-400: #b0a69e;
-  --color-gray-500: #857a72;
-  --color-gray-600: #64594f;
-  --color-gray-700: #4b423a;
-  --color-gray-800: #332c26;
-  --color-gray-900: #221c18;
+  /* --- primitives: slate neutrals --- */
+  --color-gray-50: #f8fafc;
+  --color-gray-100: #f1f5f9;
+  --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e1;
+  --color-gray-400: #94a3b8;
+  --color-gray-500: #64748b;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1e293b;
+  --color-gray-900: #0f172a;
 
   /* --- semantic: darkened so text on a -50 tint clears 4.5:1 --- */
   --color-success-50: #ecfdf5;
@@ -47,14 +48,16 @@
   --color-warning-50: #fffbeb;
   --color-warning-100: #fef3c7;
   --color-warning-700: #b45309;
-  --color-danger-50: #fff1f2;
-  --color-danger-100: #ffe4e6;
-  --color-danger-700: #be123c;
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-700: #b91c1c;
   --color-info-50: #eff6ff;
   --color-info-100: #dbeafe;
   --color-info-700: #1d4ed8;
 
-  --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+  /* Latin and Arabic drawn as one family — the operator UI is full of times
+     and amounts, and a mismatched Latin fallback shows on every row. */
+  --font-sans: 'IBM Plex Sans Arabic', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
 
   /* --- radius: encodes permanence, not decoration --- */
   --radius-sm: 4px;
@@ -67,8 +70,8 @@
   --ease-drawer: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* --- gradient: guest surfaces only --- */
-  --gradient-sunset: linear-gradient(135deg, #fbbf24 0%, #f97316 32%, #f43f5e 68%, #ec4899 100%);
-  --gradient-sunset-soft: linear-gradient(135deg, #fff8f1 0%, #fff1f2 55%, #fdf2f8 100%);
+  --gradient-brand: linear-gradient(135deg, #818cf8 0%, #4f46e5 42%, #0891b2 100%);
+  --gradient-brand-soft: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 55%, #ecfeff 100%);
 
   /* --- semantic roles: the public API of the theme ---------------------
      Everything above is a primitive; everything here is a *role*. New code
@@ -76,19 +79,19 @@
      is an edit to this block rather than a sweep across 43 files.
      Registering them in @theme generates bg-surface / text-fg /
      border-border as real utilities. */
-  --color-canvas: #fbfaf9;
+  --color-canvas: #f8fafc;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
-  --color-surface-sunken: #f6f4f2;
-  --color-surface-inverse: #221c18;
-  --color-border: #eae6e2;
-  --color-border-strong: #d9d3cd;
-  --color-fg: #221c18;
-  --color-fg-muted: #64594f;
-  --color-fg-subtle: #857a72;
+  --color-surface-sunken: #f1f5f9;
+  --color-surface-inverse: #0f172a;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-fg: #0f172a;
+  --color-fg-muted: #475569;
+  --color-fg-subtle: #64748b;
   --color-fg-on-primary: #ffffff;
-  --color-overlay: rgb(28 20 14 / 0.45);
-  --color-ring: #f97316;
+  --color-overlay: rgb(15 23 42 / 0.45);
+  --color-ring: #6366f1;
 }
 
 @layer base {
@@ -123,18 +126,17 @@
 }
 
 @layer utilities {
-  /* --- elevation: four levels, warm-tinted, border-first --------------- */
-  .elev-flat {
-    @apply border-border bg-surface border;
-  }
+  /* --- elevation: three levels, slate-tinted, border-first -------------
+     Shadows are cast in the neutral's own hue (15 23 42) rather than in
+     grey — a neutral-grey shadow over a slate surface reads muddy. */
   .elev-raised {
-    box-shadow: 0 1px 2px rgb(28 20 14 / 0.06);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
   }
   .elev-overlay {
-    box-shadow: 0 8px 24px rgb(28 20 14 / 0.1);
+    box-shadow: 0 8px 24px rgb(15 23 42 / 0.1);
   }
   .elev-modal {
-    box-shadow: 0 24px 48px rgb(28 20 14 / 0.16);
+    box-shadow: 0 24px 48px rgb(15 23 42 / 0.16);
   }
 
   /* --- operator density ------------------------------------------------ */
@@ -146,41 +148,41 @@
   }
 
   /* --- guest-only brand expression ------------------------------------- */
-  .bg-sunset {
-    background-image: var(--gradient-sunset);
+  .bg-brand {
+    background-image: var(--gradient-brand);
   }
-  .surface-soft {
-    background: var(--gradient-sunset-soft);
+  .bg-brand-soft {
+    background: var(--gradient-brand-soft);
   }
   .text-gradient {
-    background-image: var(--gradient-sunset);
+    background-image: var(--gradient-brand);
     @apply bg-clip-text text-transparent;
   }
-  .ring-sunset {
+  .ring-brand {
     background:
       linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
-      var(--gradient-sunset) border-box;
+      var(--gradient-brand) border-box;
     @apply border border-transparent;
   }
-  .btn-sunset {
-    background-image: var(--gradient-sunset);
+  .btn-brand {
+    background-image: var(--gradient-brand);
     background-size: 160% 100%;
     background-position: 0% 50%;
     @apply shadow-primary-500/25 text-white shadow-lg transition-[background-position,transform,box-shadow] duration-500;
   }
-  .btn-sunset:hover {
+  .btn-brand:hover {
     background-position: 100% 50%;
     @apply shadow-accent-500/30 shadow-xl;
   }
-  .mesh-sunset::before {
+  .mesh-brand::before {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(48rem 32rem at 88% 8%, rgb(251 146 60 / 0.22), transparent 60%),
-      radial-gradient(42rem 30rem at 6% 92%, rgb(244 63 94 / 0.18), transparent 62%),
-      radial-gradient(36rem 26rem at 55% 40%, rgb(251 191 36 / 0.12), transparent 65%);
+      radial-gradient(48rem 32rem at 88% 8%, rgb(99 102 241 / 0.2), transparent 60%),
+      radial-gradient(42rem 30rem at 6% 92%, rgb(6 182 212 / 0.16), transparent 62%),
+      radial-gradient(36rem 26rem at 55% 40%, rgb(129 140 248 / 0.12), transparent 65%);
   }
 
   /* Hides content visually while keeping it available to screen readers. */
@@ -328,37 +330,57 @@ html[dir='rtl'] .skeleton::after {
 
   /* --- section rhythm --------------------------------------------------- */
   .section {
-    @apply relative px-4 py-20 sm:px-6 md:py-28 lg:px-8;
+    @apply relative px-4 py-24 sm:px-6 md:py-32 lg:px-8;
   }
   .section-inner {
     @apply mx-auto max-w-6xl;
   }
 
-  /* Hairline that fades out at both ends — separates sections without a
-     hard rule, which would read as a table border on a marketing page. */
-  .section-divider {
-    height: 1px;
-    background: linear-gradient(
-      to left,
-      transparent,
-      var(--color-primary-200) 20%,
-      var(--color-primary-200) 80%,
-      transparent
-    );
+  /* --- type scale -------------------------------------------------------
+     Negative tracking is a Latin device. Applied to Arabic it eats into the
+     joins between letters, so the tightening lives behind html[dir='ltr']
+     and Arabic gets a touch of word-spacing instead — same optical density,
+     no damage to the script. */
+  .type-display {
+    font-size: clamp(2.75rem, 7vw, 5.5rem);
+    line-height: 1.02;
+    font-weight: 700;
+  }
+  .type-h1 {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 1.1;
+    font-weight: 700;
+  }
+  .type-h2 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    line-height: 1.2;
+    font-weight: 600;
+  }
+  .type-h3 {
+    font-size: 1.125rem;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+  .type-lede {
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    line-height: 1.6;
+    @apply text-fg-muted;
+  }
+  .type-body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .type-label {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .type-mono-num {
+    font-variant-numeric: tabular-nums slashed-zero;
   }
 
-  /* --- editorial display type ------------------------------------------ */
-  .display-xl {
-    @apply text-[2.5rem] leading-[1.12] font-extrabold tracking-tight sm:text-6xl lg:text-7xl;
-  }
-  .display-lg {
-    @apply text-3xl leading-[1.2] font-extrabold tracking-tight sm:text-4xl lg:text-5xl;
-  }
-  .lede {
-    @apply text-lg leading-relaxed text-gray-600 sm:text-xl;
-  }
-
-  /* --- fine grain: keeps large warm washes from banding ---------------- */
+  /* --- fine grain: keeps large washes from banding --------------------- */
   .grain::after {
     content: '';
     position: absolute;
@@ -370,7 +392,7 @@ html[dir='rtl'] .skeleton::after {
 
   /* --- soft dot field: structure without a visible grid ---------------- */
   .dot-field {
-    background-image: radial-gradient(var(--color-primary-200) 1px, transparent 1px);
+    background-image: radial-gradient(var(--color-border-strong) 1px, transparent 1px);
     background-size: 22px 22px;
     mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 40%, transparent 100%);
   }
@@ -385,6 +407,24 @@ html[dir='rtl'] .skeleton::after {
   .marquee:hover .marquee-track {
     animation-play-state: paused;
   }
+}
+
+/* See the note on .type-* above: tighten Latin, breathe Arabic. */
+html[dir='ltr'] .type-display {
+  letter-spacing: -0.035em;
+}
+html[dir='ltr'] .type-h1 {
+  letter-spacing: -0.025em;
+}
+html[dir='ltr'] .type-h2 {
+  letter-spacing: -0.02em;
+}
+html[dir='ltr'] .type-h3 {
+  letter-spacing: -0.01em;
+}
+html[dir='rtl'] .type-display,
+html[dir='rtl'] .type-h1 {
+  word-spacing: -0.02em;
 }
 
 @keyframes marquee-scroll {

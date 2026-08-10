@@ -68,7 +68,7 @@ onBeforeUnmount(() => io?.disconnect())
 </script>
 
 <template>
-  <section id="how-it-works" class="section surface-soft grain">
+  <section id="how-it-works" class="section bg-brand-soft grain">
     <div class="section-inner relative">
       <SectionHeading
         eyebrow="آلية العمل"
@@ -95,7 +95,7 @@ onBeforeUnmount(() => io?.disconnect())
               <Transition name="swap" mode="out-in">
                 <div :key="active" class="text-center">
                   <span
-                    class="bg-sunset shadow-primary-500/25 mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[var(--radius-xl)] text-white shadow-lg"
+                    class="bg-brand shadow-primary-500/25 mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[var(--radius-xl)] text-white shadow-lg"
                   >
                     <component :is="STEPS[active]!.icon" class="h-7 w-7" aria-hidden="true" />
                   </span>

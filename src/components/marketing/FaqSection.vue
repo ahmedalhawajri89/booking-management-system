@@ -41,7 +41,7 @@ function toggle(i: number) {
 </script>
 
 <template>
-  <section class="section surface-soft grain">
+  <section class="section bg-brand-soft grain">
     <div class="section-inner max-w-3xl!">
       <SectionHeading eyebrow="أسئلة شائعة" title="ما يسأل عنه الناس عادةً" />
 

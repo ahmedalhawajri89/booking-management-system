@@ -111,7 +111,7 @@ const price = computed(() => (p: Plan) => {
         >
           <span
             v-if="p.featured"
-            class="bg-sunset absolute -top-3 rounded-full px-3 py-1 text-[11px] font-bold text-white"
+            class="bg-brand absolute -top-3 rounded-full px-3 py-1 text-[11px] font-bold text-white"
             style="inset-inline-start: 1.5rem"
           >
             الأكثر اختياراً
@@ -130,7 +130,7 @@ const price = computed(() => (p: Plan) => {
             class="mt-5 block rounded-[var(--radius-md)] py-2.5 text-center text-sm font-bold transition-colors"
             :class="
               p.featured
-                ? 'btn-sunset'
+                ? 'btn-brand'
                 : 'hover:border-primary-300 hover:bg-primary-50 border border-gray-200 text-gray-900'
             "
           >

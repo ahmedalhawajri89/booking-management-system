@@ -49,7 +49,7 @@ const LINKS = [
         <div class="flex items-center gap-2">
           <RouterLink
             to="/book"
-            class="btn-sunset rounded-full px-4 py-2 text-sm font-medium sm:px-6 sm:py-2.5"
+            class="btn-brand rounded-full px-4 py-2 text-sm font-medium sm:px-6 sm:py-2.5"
           >
             احجز الآن
           </RouterLink>

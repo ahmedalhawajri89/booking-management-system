@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 withDefaults(
   defineProps<{ eyebrow?: string; title: string; lede?: string; align?: 'center' | 'start' }>(),
   { align: 'center' },
@@ -13,9 +13,9 @@ withDefaults(
     <p v-if="eyebrow" v-reveal class="text-primary-600 mb-3 text-[13px] font-bold tracking-wide">
       {{ eyebrow }}
     </p>
-    <h2 v-reveal="60" class="display-lg text-gray-900">
+    <h2 v-reveal="60" class="type-h1 text-gray-900">
       <slot name="title">{{ title }}</slot>
     </h2>
-    <p v-if="lede" v-reveal="120" class="lede mt-4">{{ lede }}</p>
+    <p v-if="lede" v-reveal="120" class="type-lede mt-4">{{ lede }}</p>
   </header>
 </template>

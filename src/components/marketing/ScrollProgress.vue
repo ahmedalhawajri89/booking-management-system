@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 /** Reading position for a long page. rAF-throttled, passive, RTL-aware. */
@@ -32,7 +32,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="fixed inset-x-0 top-0 z-[60] h-0.5 bg-transparent" aria-hidden="true">
     <div
-      class="bg-sunset h-full origin-[right_center] transition-transform duration-75 ease-linear ltr:origin-[left_center]"
+      class="bg-brand h-full origin-[right_center] transition-transform duration-75 ease-linear ltr:origin-[left_center]"
       :style="{ transform: `scaleX(${progress})` }"
     />
   </div>
