@@ -22,6 +22,7 @@ import BookingFormDrawer from '@/components/booking/BookingFormDrawer.vue'
 import BookingDetailDrawer from '@/components/booking/BookingDetailDrawer.vue'
 import { useBookingsStore } from '@/stores/bookings'
 import { useCustomersStore } from '@/stores/customers'
+import { useSettingsStore } from '@/stores/settings'
 import { useAuthStore } from '@/stores/auth'
 import { fullDate } from '@/lib/format'
 
@@ -29,6 +30,7 @@ const route = useRoute()
 const router = useRouter()
 const bookings = useBookingsStore()
 const customers = useCustomersStore()
+const settings = useSettingsStore()
 const auth = useAuthStore()
 
 const NAV = [
@@ -125,6 +127,9 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  // Settings first: services and opening hours are what the availability
+  // engine reads, so every other screen depends on them being current.
+  void settings.load()
   void bookings.load()
   void customers.load()
   document.addEventListener('keydown', onKeydown)

@@ -1,5 +1,11 @@
 import type { Booking, Customer } from '@/types'
 import { buildSeedBookings, customers as seedCustomers } from './seed'
+import {
+  DEFAULT_HOURS,
+  DEFAULT_RESOURCES,
+  DEFAULT_SERVICES,
+  type CatalogSnapshot,
+} from './catalog'
 
 /**
  * The seam between the UI and persistence.
@@ -13,11 +19,15 @@ export interface Repository {
   saveBookings(bookings: Booking[]): Promise<void>
   loadCustomers(): Promise<Customer[]>
   saveCustomers(customers: Customer[]): Promise<void>
+  /** Services, resources and opening hours — everything Settings can edit. */
+  loadCatalog(): Promise<CatalogSnapshot>
+  saveCatalog(snapshot: CatalogSnapshot): Promise<void>
   reset(): Promise<void>
 }
 
 const KEY_BOOKINGS = 'bookingpro:bookings:v1'
 const KEY_CUSTOMERS = 'bookingpro:customers:v1'
+const KEY_CATALOG = 'bookingpro:catalog:v1'
 const KEY_SEEDED_ON = 'bookingpro:seededOn:v1'
 
 /** Simulated latency, so loading states are real rather than theoretical. */
@@ -77,8 +87,25 @@ class LocalRepository implements Repository {
     write(KEY_CUSTOMERS, customers)
   }
 
+  async loadCatalog(): Promise<CatalogSnapshot> {
+    const stored = read<CatalogSnapshot>(KEY_CATALOG)
+    return delay(
+      stored ?? {
+        services: structuredClone(DEFAULT_SERVICES),
+        resources: structuredClone(DEFAULT_RESOURCES),
+        businessHours: structuredClone(DEFAULT_HOURS),
+      },
+    )
+  }
+
+  async saveCatalog(snapshot: CatalogSnapshot): Promise<void> {
+    write(KEY_CATALOG, snapshot)
+  }
+
   async reset(): Promise<void> {
-    ;[KEY_BOOKINGS, KEY_CUSTOMERS, KEY_SEEDED_ON].forEach((k) => localStorage.removeItem(k))
+    ;[KEY_BOOKINGS, KEY_CUSTOMERS, KEY_CATALOG, KEY_SEEDED_ON].forEach((k) =>
+      localStorage.removeItem(k),
+    )
   }
 }
 

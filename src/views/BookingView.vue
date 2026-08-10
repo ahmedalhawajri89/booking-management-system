@@ -10,6 +10,7 @@ import TimeSlotGrid from '@/components/booking/TimeSlotGrid.vue'
 import AppLogo from '@/components/ui/AppLogo.vue'
 import { useBookingsStore } from '@/stores/bookings'
 import { useCustomersStore } from '@/stores/customers'
+import { useSettingsStore } from '@/stores/settings'
 import { businessHours, services } from '@/data/catalog'
 import { generateSlots } from '@/lib/availability'
 import { duration, fullDate, money, time } from '@/lib/format'
@@ -21,6 +22,7 @@ import { duration, fullDate, money, time } from '@/lib/format'
  */
 const bookings = useBookingsStore()
 const customers = useCustomersStore()
+const settings = useSettingsStore()
 
 const DRAFT_KEY = 'bookingpro:draft:v1'
 
@@ -87,7 +89,9 @@ function saveDraft() {
 }
 
 onMounted(async () => {
-  await Promise.all([bookings.load(), customers.load()])
+  // The guest wizard offers slots computed from services and opening hours,
+  // so the catalog has to be current before the first grid renders.
+  await Promise.all([settings.load(), bookings.load(), customers.load()])
   try {
     const raw = localStorage.getItem(DRAFT_KEY)
     if (!raw) return
