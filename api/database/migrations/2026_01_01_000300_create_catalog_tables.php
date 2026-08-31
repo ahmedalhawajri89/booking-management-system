@@ -32,7 +32,12 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('org_id');
             $table->string('name');
-            $table->text('description')->default('');
+            // Nullable rather than `->default('')`: MySQL 8 refuses a DEFAULT on
+            // a TEXT column outright, while MariaDB accepts it — so the version
+            // that worked on the machine this was written on would have failed
+            // on the first real MySQL it met. The API already reads it as
+            // `?? ''`, so nothing above the schema notices.
+            $table->text('description')->nullable();
             $table->integer('duration_min');
             $table->integer('buffer_min')->default(0);
             $table->integer('price_minor')->default(0);
