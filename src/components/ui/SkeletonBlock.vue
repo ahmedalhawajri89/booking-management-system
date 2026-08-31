@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script setup>
 /** Matches the geometry of the real content, so nothing jumps on load. */
-withDefaults(defineProps<{ variant?: 'text' | 'row' | 'card'; count?: number }>(), {
-  variant: 'text',
-  count: 1,
+defineProps({
+  variant: { type: String, required: false, default: 'text' },
+  count: { type: Number, required: false, default: 1 },
 })
 
 // .skeleton adds the sweep (see main.css). It was defined there but never
@@ -14,7 +14,12 @@ const BAR = 'skeleton bg-surface-sunken rounded'
 <template>
   <div class="space-y-3" role="status" aria-live="polite" aria-label="جارٍ التحميل">
     <template v-for="i in count" :key="i">
-      <div v-if="variant === 'text'" class="h-4" :class="BAR" :style="{ width: `${90 - i * 8}%` }" />
+      <div
+        v-if="variant === 'text'"
+        class="h-4"
+        :class="BAR"
+        :style="{ width: `${90 - i * 8}%` }"
+      />
 
       <div v-else-if="variant === 'row'" class="flex items-center gap-3 py-3">
         <div class="skeleton bg-surface-sunken h-9 w-9 shrink-0 rounded-full" />

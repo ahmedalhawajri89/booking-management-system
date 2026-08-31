@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { ArrowLeft, Sparkles } from 'lucide-vue-next'
 </script>
 

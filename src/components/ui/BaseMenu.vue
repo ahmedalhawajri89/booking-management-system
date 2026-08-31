@@ -1,55 +1,44 @@
-<script setup lang="ts">
+<script setup>
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import type { LucideIcon } from '@/types'
-
-export interface MenuItem {
-  value: string
-  label: string
-  icon?: LucideIcon
-  tone?: 'default' | 'danger'
-  disabled?: boolean
-  /** Draws a rule above this item — for separating destructive actions. */
-  separated?: boolean
-}
 
 /**
  * Dropdown menu. Positioned by the browser via an absolutely placed panel
  * anchored to the trigger, not by a positioning library: the menus here are
  * short and always near a screen edge we control.
  */
-withDefaults(defineProps<{ items: MenuItem[]; label: string; align?: 'start' | 'end' }>(), {
-  align: 'end',
+defineProps({
+  items: { type: Array, required: true },
+  label: { type: String, required: true },
+  align: { type: String, required: false, default: 'end' },
 })
 
-const emit = defineEmits<{ select: [value: string] }>()
+const emit = defineEmits(['select'])
 
 const open = ref(false)
-const root = ref<HTMLElement | null>(null)
-const panel = ref<HTMLElement | null>(null)
+const root = ref(null)
+const panel = ref(null)
 
 function close(restoreFocus = true) {
   if (!open.value) return
   open.value = false
-  if (restoreFocus) root.value?.querySelector<HTMLElement>('[data-menu-trigger]')?.focus()
+  if (restoreFocus) root.value?.querySelector('[data-menu-trigger]')?.focus()
 }
 
-function choose(item: MenuItem) {
+function choose(item) {
   if (item.disabled) return
   emit('select', item.value)
   close()
 }
 
-function focusItem(index: number) {
-  const nodes = panel.value?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])')
+function focusItem(index) {
+  const nodes = panel.value?.querySelectorAll('[role="menuitem"]:not([disabled])')
   if (!nodes?.length) return
   nodes[(index + nodes.length) % nodes.length]?.focus()
 }
 
-function onPanelKey(e: KeyboardEvent) {
-  const nodes = Array.from(
-    panel.value?.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])') ?? [],
-  )
-  const current = nodes.indexOf(document.activeElement as HTMLElement)
+function onPanelKey(e) {
+  const nodes = Array.from(panel.value?.querySelectorAll('[role="menuitem"]:not([disabled])') ?? [])
+  const current = nodes.indexOf(document.activeElement)
 
   if (e.key === 'ArrowDown') focusItem(current + 1)
   else if (e.key === 'ArrowUp') focusItem(current - 1)
@@ -65,8 +54,8 @@ function onPanelKey(e: KeyboardEvent) {
   e.preventDefault()
 }
 
-function onDocumentPointer(e: PointerEvent) {
-  if (!root.value?.contains(e.target as Node)) close(false)
+function onDocumentPointer(e) {
+  if (!root.value?.contains(e.target)) close(false)
 }
 
 watch(open, async (isOpen) => {

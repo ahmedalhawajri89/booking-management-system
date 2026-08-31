@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed, ref } from 'vue'
 import {
   CalendarClock,
@@ -11,7 +11,6 @@ import {
   XCircle,
 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
-import type { BookingStatus, PaymentStatus } from '@/types'
 import BaseDrawer from '@/components/ui/BaseDrawer.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
@@ -26,8 +25,10 @@ import { clone } from '@/lib/clone'
  * The single source of truth for one booking. The action row is status-aware:
  * what the operator most likely needs to do next always leads.
  */
-const props = defineProps<{ bookingId: string | null }>()
-const emit = defineEmits<{ close: [] }>()
+const props = defineProps({
+  bookingId: { type: [String, null], required: true },
+})
+const emit = defineEmits(['close'])
 
 const store = useBookingsStore()
 
@@ -43,7 +44,7 @@ const confirmCancel = ref(false)
 const rescheduleOpen = ref(false)
 
 /** Snapshot before a destructive change so the toast can offer a real undo. */
-function withUndo(label: string, mutate: () => void) {
+function withUndo(label, mutate) {
   const before = booking.value ? clone(booking.value) : null
   mutate()
   toast.success(label, {
@@ -51,13 +52,13 @@ function withUndo(label: string, mutate: () => void) {
   })
 }
 
-function setStatus(status: BookingStatus, label: string) {
+function setStatus(status, label) {
   if (!booking.value) return
   const id = booking.value.id
   withUndo(label, () => store.setStatus(id, status))
 }
 
-function setPayment(payment: PaymentStatus, label: string) {
+function setPayment(payment, label) {
   if (!booking.value) return
   const id = booking.value.id
   withUndo(label, () => store.setPayment(id, payment))

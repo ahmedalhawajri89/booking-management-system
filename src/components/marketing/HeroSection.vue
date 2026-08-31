@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowLeft, ArrowDown, CalendarCheck, Play } from 'lucide-vue-next'
 import HeroBoard from './hero/HeroBoard.vue'
@@ -35,16 +35,14 @@ const SCENES = [
   },
 ]
 
-const container = ref<HTMLElement | null>(null)
+const container = ref(null)
 
 // The channels scene is the one that survives being cut: on a phone the three
 // chips and the board cannot share the frame legibly, and the argument still
 // lands without it.
 const isNarrow = ref(false)
 const sceneCount = computed(() => (isNarrow.value ? 3 : 4))
-const activeScenes = computed(() =>
-  isNarrow.value ? [SCENES[0]!, SCENES[1]!, SCENES[3]!] : SCENES,
-)
+const activeScenes = computed(() => (isNarrow.value ? [SCENES[0], SCENES[1], SCENES[3]] : SCENES))
 const { progress, sceneIndex, sceneProgress, goToScene, reduced } = useScrollScenes(
   container,
   sceneCount,
@@ -55,8 +53,8 @@ const boardScene = computed(() =>
   isNarrow.value ? ([0, 1, 3][sceneIndex.value] ?? 0) : sceneIndex.value,
 )
 
-let mq: MediaQueryList | undefined
-function syncWidth(e: MediaQueryList | MediaQueryListEvent) {
+let mq
+function syncWidth(e) {
   isNarrow.value = e.matches
 }
 onMounted(() => {
@@ -66,7 +64,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => mq?.removeEventListener('change', syncWidth))
 
-const current = computed(() => activeScenes.value[sceneIndex.value] ?? activeScenes.value[0]!)
+const current = computed(() => activeScenes.value[sceneIndex.value] ?? activeScenes.value[0])
 </script>
 
 <template>

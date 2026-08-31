@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { Calendar } from 'lucide-vue-next'
 
 const year = new Date().getFullYear()

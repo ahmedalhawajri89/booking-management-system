@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Plus } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
 
@@ -53,7 +53,10 @@ const FAQ = [
         sticky
       />
 
-      <div v-reveal class="border-border bg-surface divide-border divide-y rounded-[var(--radius-xl)] border">
+      <div
+        v-reveal
+        class="border-border bg-surface divide-border divide-y rounded-[var(--radius-xl)] border"
+      >
         <details v-for="item in FAQ" :key="item.q" name="faq" class="group">
           <summary
             class="hover:bg-surface-sunken flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 transition-colors"

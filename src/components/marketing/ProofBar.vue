@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ShieldCheck } from 'lucide-vue-next'
 import { useCountUp } from '@/composables/useCountUp'
 

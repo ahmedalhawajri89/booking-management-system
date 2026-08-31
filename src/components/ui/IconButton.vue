@@ -1,22 +1,17 @@
-﻿<script setup lang="ts">
-import type { LucideIcon } from '@/types'
-
+﻿<script setup>
 /** Icon-only control. `label` is mandatory — it becomes the accessible name. */
-withDefaults(
-  defineProps<{
-    icon: LucideIcon
-    label: string
-    variant?: 'ghost' | 'secondary' | 'danger'
-    size?: 'sm' | 'md'
-  }>(),
-  { variant: 'ghost', size: 'md' },
-)
+defineProps({
+  icon: { type: null, required: true },
+  label: { type: String, required: true },
+  variant: { type: String, required: false, default: 'ghost' },
+  size: { type: String, required: false, default: 'md' },
+})
 
 const VARIANT = {
   ghost: 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 border-transparent',
   secondary: 'bg-surface text-gray-600 hover:bg-gray-50 border-gray-200',
   danger: 'text-danger-700 hover:bg-danger-50 border-transparent',
-} as const
+}
 </script>
 
 <template>

@@ -1,14 +1,13 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { isSameDay, isWithinInterval, startOfDay, addDays, format } from 'date-fns'
 import { ArrowDown, ArrowUp, CalendarPlus, Download, SearchX } from 'lucide-vue-next'
-import type { Booking, BookingStatus } from '@/types'
 import { useBookingsStore } from '@/stores/bookings'
 import { useCustomersStore } from '@/stores/customers'
 import { services, serviceById } from '@/data/catalog'
 import { BOOKING_STATUS, PAYMENT_STATUS } from '@/lib/status'
-import { downloadCsv, type Column } from '@/lib/export'
+import { downloadCsv } from '@/lib/export'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import ErrorState from '@/components/ui/ErrorState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
@@ -16,27 +15,24 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BookingRow from '@/components/booking/BookingRow.vue'
 
-const emit = defineEmits<{ openBooking: [id: string] }>()
+const emit = defineEmits(['openBooking'])
 
 const route = useRoute()
 const store = useBookingsStore()
 const customers = useCustomersStore()
 
-type QuickFilter = 'all' | 'today' | 'week' | 'pending' | 'unpaid' | 'attention'
-type SortKey = 'time' | 'customer' | 'status' | 'price'
-
 const query = ref('')
-const quick = ref<QuickFilter>('all')
-const status = ref<BookingStatus | 'all'>('all')
-const serviceId = ref<string | 'all'>('all')
-const sortKey = ref<SortKey>('time')
+const quick = ref('all')
+const status = ref('all')
+const serviceId = ref('all')
+const sortKey = ref('time')
 const sortDesc = ref(false)
 const page = ref(1)
 
 /** Large enough that most operators never paginate, small enough to stay fast. */
 const PAGE_SIZE = 50
 
-const QUICK: { value: QuickFilter; label: string }[] = [
+const QUICK = [
   { value: 'all', label: 'الكل' },
   { value: 'today', label: 'اليوم' },
   { value: 'week', label: 'هذا الأسبوع' },
@@ -45,7 +41,7 @@ const QUICK: { value: QuickFilter; label: string }[] = [
   { value: 'attention', label: 'يحتاج إجراء' },
 ]
 
-const SORTS: { value: SortKey; label: string }[] = [
+const SORTS = [
   { value: 'time', label: 'الموعد' },
   { value: 'customer', label: 'العميل' },
   { value: 'status', label: 'الحالة' },
@@ -53,7 +49,7 @@ const SORTS: { value: SortKey; label: string }[] = [
 ]
 
 onMounted(() => {
-  query.value = (route.query.q as string) ?? ''
+  query.value = route.query.q ?? ''
   if (route.query.filter === 'attention') quick.value = 'attention'
 })
 
@@ -71,7 +67,7 @@ watch([query, quick, status, serviceId, sortKey, sortDesc], () => (page.value = 
 
 const attentionIds = computed(() => new Set(store.attention.map((a) => a.booking.id)))
 
-function matchesQuick(b: Booking): boolean {
+function matchesQuick(b) {
   const start = new Date(b.startAt)
   switch (quick.value) {
     case 'today':
@@ -92,7 +88,7 @@ function matchesQuick(b: Booking): boolean {
   }
 }
 
-function matchesQuery(b: Booking): boolean {
+function matchesQuery(b) {
   const q = query.value.trim()
   if (!q) return true
   const digits = q.replace(/\D/g, '')
@@ -116,7 +112,7 @@ const filtered = computed(() =>
 
 // Status sorts by workflow order, not alphabetically: "pending" before
 // "completed" is what an operator means by sorting on status.
-const STATUS_ORDER: Record<BookingStatus, number> = {
+const STATUS_ORDER = {
   pending: 0,
   confirmed: 1,
   completed: 2,
@@ -170,7 +166,7 @@ function clearAll() {
   serviceId.value = 'all'
 }
 
-function toggleSort(key: SortKey) {
+function toggleSort(key) {
   if (sortKey.value === key) sortDesc.value = !sortDesc.value
   else {
     sortKey.value = key
@@ -181,7 +177,7 @@ function toggleSort(key: SortKey) {
 /** Exports what is on screen after filtering — not the current page, and not
  *  the whole table. What you filtered to is what you meant. */
 function exportCsv() {
-  const columns: Column<Booking>[] = [
+  const columns = [
     { header: 'المرجع', value: (b) => b.reference },
     { header: 'التاريخ', value: (b) => format(new Date(b.startAt), 'yyyy-MM-dd') },
     { header: 'من', value: (b) => format(new Date(b.startAt), 'HH:mm') },
@@ -207,12 +203,7 @@ function exportCsv() {
           <span data-numeric>{{ results.length }}</span> من
           <span data-numeric>{{ store.items.length }}</span>
         </p>
-        <BaseButton
-          size="sm"
-          :icon="Download"
-          :disabled="results.length === 0"
-          @click="exportCsv"
-        >
+        <BaseButton size="sm" :icon="Download" :disabled="results.length === 0" @click="exportCsv">
           تصدير
         </BaseButton>
       </div>

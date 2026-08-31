@@ -1,12 +1,11 @@
-<script setup lang="ts">
+<script setup>
 import { computed, ref } from 'vue'
 import { Download, UserSearch, Users } from 'lucide-vue-next'
 import { format } from 'date-fns'
-import type { Customer } from '@/types'
 import { useCustomersStore } from '@/stores/customers'
 import { useBookingsStore } from '@/stores/bookings'
 import { money, relativeDayTime } from '@/lib/format'
-import { downloadCsv, type Column } from '@/lib/export'
+import { downloadCsv } from '@/lib/export'
 import SearchInput from '@/components/ui/SearchInput.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import ErrorState from '@/components/ui/ErrorState.vue'
@@ -16,19 +15,19 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseDrawer from '@/components/ui/BaseDrawer.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 
-const emit = defineEmits<{ openBooking: [id: string] }>()
+const emit = defineEmits(['openBooking'])
 
 const customers = useCustomersStore()
 const bookings = useBookingsStore()
 
 const query = ref('')
-const selectedId = ref<string | null>(null)
+const selectedId = ref(null)
 
 const results = computed(() => customers.search(query.value))
 const selected = computed(() => (selectedId.value ? customers.byId(selectedId.value) : null))
 
 /** Every figure is derived from bookings — nothing is stored or invented. */
-function statsFor(customerId: string) {
+function statsFor(customerId) {
   const all = bookings.forCustomer(customerId)
   return {
     all,
@@ -43,7 +42,7 @@ function statsFor(customerId: string) {
 const stats = computed(() => (selected.value ? statsFor(selected.value.id) : null))
 
 function exportCsv() {
-  const columns: Column<Customer>[] = [
+  const columns = [
     { header: 'الاسم', value: (c) => c.name },
     { header: 'الجوال', value: (c) => c.phone },
     { header: 'البريد', value: (c) => c.email ?? '' },
@@ -108,7 +107,11 @@ function exportCsv() {
             <BaseAvatar :name="c.name" size="sm" />
             <span class="min-w-0 flex-1">
               <span class="text-fg block truncate text-sm font-semibold">{{ c.name }}</span>
-              <span class="text-fg-subtle block truncate text-xs" dir="ltr" style="text-align: start">
+              <span
+                class="text-fg-subtle block truncate text-xs"
+                dir="ltr"
+                style="text-align: start"
+              >
                 {{ c.phone }}
               </span>
             </span>

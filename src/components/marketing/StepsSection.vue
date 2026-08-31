@@ -1,27 +1,9 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { BadgeCheck, ClipboardCheck, Clock4, MousePointerClick } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
-import type { LucideIcon } from '@/types'
 
-/**
- * A horizontal timeline, not a card row.
- *
- * The steps are one continuous sequence, and a rail that fills as you reach
- * each stop says that; four boxes side by side say "four unrelated things".
- * The rail is the only progress indicator, so it is the thing that moves.
- *
- * Below `md` it becomes a vertical rail — the same object, rotated, rather
- * than a different component.
- */
-interface Step {
-  icon: LucideIcon
-  title: string
-  body: string
-  caption: string
-}
-
-const STEPS: Step[] = [
+const STEPS = [
   {
     icon: MousePointerClick,
     title: 'العميل يختار الخدمة',
@@ -50,11 +32,11 @@ const STEPS: Step[] = [
 
 const active = ref(0)
 const fill = computed(() => (active.value + 1) / STEPS.length)
-const stepEls = ref<HTMLElement[]>([])
-let io: IntersectionObserver | null = null
+const stepEls = ref([])
+let io = null
 
-function setRef(el: Element | null, i: number) {
-  if (el) stepEls.value[i] = el as HTMLElement
+function setRef(el, i) {
+  if (el) stepEls.value[i] = el
 }
 
 onMounted(() => {
@@ -62,7 +44,7 @@ onMounted(() => {
     (entries) => {
       for (const e of entries) {
         if (!e.isIntersecting) continue
-        const i = stepEls.value.indexOf(e.target as HTMLElement)
+        const i = stepEls.value.indexOf(e.target)
         if (i !== -1) active.value = Math.max(active.value, i)
       }
     },
@@ -112,7 +94,7 @@ onBeforeUnmount(() => io?.disconnect())
         <li
           v-for="(s, i) in STEPS"
           :key="s.title"
-          :ref="(el) => setRef(el as Element | null, i)"
+          :ref="(el) => setRef(el, i)"
           v-reveal
           class="relative ps-14 transition-opacity duration-500 md:ps-0"
           :class="i <= active ? 'opacity-100' : 'md:opacity-45'"

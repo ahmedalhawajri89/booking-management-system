@@ -1,27 +1,22 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { computed, useId } from 'vue'
-import type { LucideIcon } from '@/types'
 
 /** Owns its label, hint and error, and wires the ARIA relationships itself. */
-const props = withDefaults(
-  defineProps<{
-    modelValue: string
-    label: string
-    type?: 'text' | 'tel' | 'email' | 'password' | 'number' | 'textarea'
-    placeholder?: string
-    hint?: string
-    error?: string
-    icon?: LucideIcon
-    required?: boolean
-    disabled?: boolean
-    /** Latin-content fields (phone, email, reference) need an LTR island. */
-    ltr?: boolean
-    rows?: number
-  }>(),
-  { type: 'text', required: false, disabled: false, ltr: false, rows: 4 },
-)
+const props = defineProps({
+  modelValue: { type: String, required: true },
+  label: { type: String, required: true },
+  type: { type: String, required: false, default: 'text' },
+  placeholder: { type: String, required: false },
+  hint: { type: String, required: false },
+  error: { type: String, required: false },
+  icon: { type: null, required: false },
+  required: { type: Boolean, required: false, default: false },
+  disabled: { type: Boolean, required: false, default: false },
+  ltr: { type: Boolean, required: false, default: false },
+  rows: { type: Number, required: false, default: 4 },
+})
 
-defineEmits<{ 'update:modelValue': [value: string] }>()
+defineEmits(['update:modelValue'])
 
 const id = useId()
 const hintId = computed(() => (props.hint ? `${id}-hint` : undefined))
@@ -56,9 +51,9 @@ const describedBy = computed(
         :rows="rows"
         :aria-invalid="error ? true : undefined"
         :aria-describedby="describedBy"
-        class="focus:border-primary-400 w-full resize-none rounded-[var(--radius-md)] border bg-surface px-3 py-2.5 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
+        class="focus:border-primary-400 bg-surface w-full resize-none rounded-[var(--radius-md)] border px-3 py-2.5 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
         :class="error ? 'border-danger-700/50' : 'border-gray-200'"
-        @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+        @input="$emit('update:modelValue', $event.target.value)"
       />
 
       <input
@@ -72,13 +67,13 @@ const describedBy = computed(
         :dir="ltr ? 'ltr' : undefined"
         :aria-invalid="error ? true : undefined"
         :aria-describedby="describedBy"
-        class="focus:border-primary-400 h-10 w-full rounded-[var(--radius-md)] border bg-surface px-3 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
+        class="focus:border-primary-400 bg-surface h-10 w-full rounded-[var(--radius-md)] border px-3 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
         :class="[
           error ? 'border-danger-700/50' : 'border-gray-200',
           icon && 'ps-9',
           ltr && 'text-start',
         ]"
-        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        @input="$emit('update:modelValue', $event.target.value)"
       />
     </div>
 

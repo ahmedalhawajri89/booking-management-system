@@ -1,11 +1,9 @@
-<script setup lang="ts">
+<script setup>
 import { Calendar } from 'lucide-vue-next'
 
-withDefaults(defineProps<{ compact?: boolean; inverse?: boolean }>(), {
-  compact: false,
-  // Set when the logo sits on the dark hero stage, where the wordmark's
-  // gradient half would otherwise disappear into the background.
-  inverse: false,
+defineProps({
+  compact: { type: Boolean, required: false, default: false },
+  inverse: { type: Boolean, required: false, default: false },
 })
 </script>
 
@@ -15,7 +13,9 @@ withDefaults(defineProps<{ compact?: boolean; inverse?: boolean }>(), {
       class="rounded-xl text-white"
       :class="[
         compact ? 'p-1.5' : 'p-2.5',
-        inverse ? 'border border-white/25 bg-white/10 backdrop-blur' : 'bg-brand shadow-primary-500/25 shadow-lg',
+        inverse
+          ? 'border border-white/25 bg-white/10 backdrop-blur'
+          : 'bg-brand shadow-primary-500/25 shadow-lg',
       ]"
     >
       <Calendar :class="compact ? 'h-5 w-5' : 'h-6 w-6'" />

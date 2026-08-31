@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed, ref } from 'vue'
 import { Check, Minus } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
@@ -17,15 +17,7 @@ import SectionHeading from './SectionHeading.vue'
  */
 const yearly = ref(true)
 
-interface Plan {
-  name: string
-  monthly: number
-  tagline: string
-  cta: string
-  featured?: boolean
-}
-
-const PLANS: Plan[] = [
+const PLANS = [
   { name: 'البداية', monthly: 0, tagline: 'لنشاط فردي يبدأ الآن.', cta: 'ابدأ مجاناً' },
   {
     name: 'الاحترافي',
@@ -38,7 +30,7 @@ const PLANS: Plan[] = [
 ]
 
 /** One row per capability, one cell per plan — the whole point of the layout. */
-const FEATURES: { label: string; included: [boolean, boolean, boolean] }[] = [
+const FEATURES = [
   { label: 'حجوزات غير محدودة', included: [true, true, true] },
   { label: 'صفحة حجز للعملاء', included: [true, true, true] },
   { label: 'منع التعارضات', included: [true, true, true] },
@@ -50,7 +42,7 @@ const FEATURES: { label: string; included: [boolean, boolean, boolean] }[] = [
   { label: 'صلاحيات مخصّصة وAPI', included: [false, false, true] },
 ]
 
-const price = computed(() => (p: Plan) => {
+const price = computed(() => (p) => {
   if (p.monthly === 0) return 'مجاناً'
   return `${yearly.value ? Math.round(p.monthly * 0.8) : p.monthly} ر.س`
 })
@@ -146,14 +138,10 @@ const price = computed(() => (p: Plan) => {
                 {{ f.label }}
               </th>
               <td v-for="(inc, i) in f.included" :key="i" class="px-4 py-3 text-center">
-                <Check
-                  v-if="inc"
-                  class="text-success-700 mx-auto h-4.5 w-4.5"
-                  aria-hidden="true"
-                />
+                <Check v-if="inc" class="text-success-700 mx-auto h-4.5 w-4.5" aria-hidden="true" />
                 <Minus v-else class="text-border-strong mx-auto h-4.5 w-4.5" aria-hidden="true" />
                 <span class="sr-only">
-                  {{ PLANS[i]!.name }} — {{ inc ? 'متضمّن' : 'غير متضمّن' }}
+                  {{ PLANS[i].name }} — {{ inc ? 'متضمّن' : 'غير متضمّن' }}
                 </span>
               </td>
             </tr>
@@ -168,7 +156,9 @@ const price = computed(() => (p: Plan) => {
           :key="p.name"
           v-reveal="pi * 90"
           class="rounded-[var(--radius-xl)] border p-5"
-          :class="p.featured ? 'border-primary-300 elev-raised bg-primary-50' : 'border-border bg-surface'"
+          :class="
+            p.featured ? 'border-primary-300 elev-raised bg-primary-50' : 'border-border bg-surface'
+          "
         >
           <p v-if="p.featured" class="text-primary-700 mb-1 text-[11px] font-bold">
             الأكثر اختياراً
@@ -185,7 +175,7 @@ const price = computed(() => (p: Plan) => {
             :class="
               p.featured
                 ? 'btn-brand'
-                : 'border-border hover:border-primary-300 text-fg border bg-surface'
+                : 'border-border hover:border-primary-300 text-fg bg-surface border'
             "
           >
             {{ p.cta }}

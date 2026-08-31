@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import {
@@ -17,7 +17,7 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import SearchInput from '@/components/ui/SearchInput.vue'
 import IconButton from '@/components/ui/IconButton.vue'
 import BaseAvatar from '@/components/ui/BaseAvatar.vue'
-import BaseMenu, { type MenuItem } from '@/components/ui/BaseMenu.vue'
+import BaseMenu from '@/components/ui/BaseMenu.vue'
 import BookingFormDrawer from '@/components/booking/BookingFormDrawer.vue'
 import BookingDetailDrawer from '@/components/booking/BookingDetailDrawer.vue'
 import { useBookingsStore } from '@/stores/bookings'
@@ -40,15 +40,15 @@ const NAV = [
   { to: '/app/customers', label: 'العملاء', icon: Users },
   { to: '/app/analytics', label: 'التحليلات', icon: BarChart3 },
   { to: '/app/settings', label: 'الإعدادات', icon: Settings },
-] as const
+]
 
 /**
  * Six is one too many for the bottom bar on a phone, so these two live in the
  * account menu there instead of being crushed to unreadable widths.
  */
-const PHONE_HIDDEN: ReadonlySet<string> = new Set(['/app/analytics', '/app/settings'])
+const PHONE_HIDDEN = new Set(['/app/analytics', '/app/settings'])
 
-const ACCOUNT_ITEMS: MenuItem[] = [
+const ACCOUNT_ITEMS = [
   { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'settings', label: 'الإعدادات', icon: Settings },
   { value: 'signout', label: 'تسجيل الخروج', icon: LogOut, tone: 'danger', separated: true },
@@ -56,16 +56,16 @@ const ACCOUNT_ITEMS: MenuItem[] = [
 
 const query = ref('')
 const createOpen = ref(false)
-const searchRef = ref<InstanceType<typeof SearchInput> | null>(null)
+const searchRef = ref(null)
 
 const attentionCount = computed(() => bookings.attention.length)
-const openBookingId = computed(() => (route.query.booking as string | undefined) ?? null)
+const openBookingId = computed(() => route.query.booking ?? null)
 
-function isActive(to: string): boolean {
+function isActive(to) {
   return to === '/app' ? route.path === '/app' : route.path.startsWith(to)
 }
 
-function openBooking(id: string) {
+function openBooking(id) {
   void router.push({ query: { ...route.query, booking: id } })
 }
 
@@ -105,14 +105,14 @@ function signOut() {
   void router.push('/')
 }
 
-function onAccountSelect(value: string) {
+function onAccountSelect(value) {
   if (value === 'signout') return signOut()
   void router.push(value === 'settings' ? '/app/settings' : '/app/analytics')
 }
 
 /** Global shortcuts: `/` focuses search, `n` opens the create drawer. */
-function onKeydown(e: KeyboardEvent) {
-  const target = e.target as HTMLElement | null
+function onKeydown(e) {
+  const target = e.target
   const typing =
     /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName ?? '') || target?.isContentEditable
   if (typing || e.metaKey || e.ctrlKey || e.altKey) return
@@ -149,7 +149,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
     <!-- Rail: labels ≥lg, icons ≥md, bottom tabs below md -->
     <aside
-      class="fixed bottom-0 z-30 flex w-full shrink-0 border-t border-gray-200 bg-surface md:sticky md:top-0 md:h-screen md:w-16 md:flex-col md:border-e md:border-t-0 md:border-gray-200 lg:w-60"
+      class="bg-surface fixed bottom-0 z-30 flex w-full shrink-0 border-t border-gray-200 md:sticky md:top-0 md:h-screen md:w-16 md:flex-col md:border-e md:border-t-0 md:border-gray-200 lg:w-60"
     >
       <div class="hidden h-16 items-center px-4 md:flex lg:px-5">
         <AppLogo compact />
@@ -190,7 +190,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
     <!-- Main column -->
     <div class="flex min-w-0 flex-1 flex-col pb-16 md:pb-0">
       <header
-        class="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-gray-200 bg-surface/95 px-4 backdrop-blur sm:gap-3 lg:px-6"
+        class="bg-surface/95 sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-gray-200 px-4 backdrop-blur sm:gap-3 lg:px-6"
       >
         <p class="hidden min-w-0 truncate text-sm font-semibold text-gray-500 lg:block">
           {{ fullDate(new Date()) }}

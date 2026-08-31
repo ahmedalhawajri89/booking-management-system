@@ -1,7 +1,6 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 import { addDays, differenceInMinutes, isSameDay, set, startOfDay } from 'date-fns'
-import type { Booking } from '@/types'
 import { useBookingsStore } from '@/stores/bookings'
 import { businessHours } from '@/data/catalog'
 import { hoursFor } from '@/lib/availability'
@@ -16,13 +15,18 @@ import { BOOKING_STATUS } from '@/lib/status'
  * answer "which days are full", not "what is at 10:20". Anything needing that
  * detail is one click away in the day view.
  */
-const props = defineProps<{ start: Date; bookings: Booking[] }>()
-defineEmits<{ open: [id: string]; pickDay: [date: Date] }>()
+const props = defineProps({
+  start: { type: Date, required: true },
+  bookings: { type: Array, required: true },
+})
+defineEmits(['open', 'pickDay'])
 
 const store = useBookingsStore()
 const PX_PER_MIN = 0.5
 
-const days = computed(() => Array.from({ length: 7 }, (_, i) => addDays(startOfDay(props.start), i)))
+const days = computed(() =>
+  Array.from({ length: 7 }, (_, i) => addDays(startOfDay(props.start), i)),
+)
 
 /**
  * One rail for all seven columns, so blocks line up across days. Taking the
@@ -48,7 +52,7 @@ const bounds = computed(() => {
 const ticks = computed(() => {
   const b = bounds.value
   if (!b) return []
-  const out: { label: string; top: number }[] = []
+  const out = []
   for (let m = b.openMin; m <= b.closeMin; m += 60) {
     out.push({
       label: time(set(startOfDay(new Date()), { hours: Math.floor(m / 60), minutes: m % 60 })),
@@ -58,7 +62,7 @@ const ticks = computed(() => {
   return out
 })
 
-function blocksFor(day: Date) {
+function blocksFor(day) {
   const b = bounds.value
   if (!b) return []
   const dayOpen = set(startOfDay(day), {
@@ -78,12 +82,12 @@ function blocksFor(day: Date) {
     }))
 }
 
-function isClosed(day: Date): boolean {
+function isClosed(day) {
   const h = hoursFor(businessHours, day)
   return !h || h.isClosed
 }
 
-const TONE: Record<string, string> = {
+const TONE = {
   success: 'border-success-700/30 bg-success-50 text-success-700',
   warning: 'border-warning-700/30 bg-warning-50 text-warning-700',
   danger: 'border-danger-700/30 bg-danger-50 text-danger-700',
@@ -175,7 +179,7 @@ const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأر
             :title="`${b.view.customer?.name} · ${b.view.service?.name}`"
             @click="$emit('open', b.booking.id)"
           >
-            <span class="block truncate text-[10px] font-bold leading-[14px]">
+            <span class="block truncate text-[10px] leading-[14px] font-bold">
               {{ b.view.customer?.name }}
             </span>
           </button>

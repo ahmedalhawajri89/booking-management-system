@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { CalendarClock, SearchX } from 'lucide-vue-next'
@@ -62,7 +62,7 @@ function cancel() {
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <header class="border-b border-gray-200 bg-surface">
+    <header class="bg-surface border-b border-gray-200">
       <div class="mx-auto flex h-16 max-w-2xl items-center justify-between px-4">
         <AppLogo compact />
         <RouterLink to="/" class="text-sm font-semibold text-gray-500 hover:text-gray-900">
@@ -115,8 +115,8 @@ function cancel() {
       <div v-else-if="view" class="space-y-4">
         <div class="surface p-5">
           <div class="mb-4 flex items-center justify-between gap-2">
-            <span class="text-sm font-bold text-gray-900" dir="ltr">{{ booking!.reference }}</span>
-            <StatusBadge :status="booking!.status" />
+            <span class="text-sm font-bold text-gray-900" dir="ltr">{{ booking.reference }}</span>
+            <StatusBadge :status="booking.status" />
           </div>
 
           <dl class="space-y-3 text-sm">
@@ -126,24 +126,24 @@ function cancel() {
             </div>
             <div class="flex justify-between gap-3">
               <dt class="text-gray-500">التاريخ</dt>
-              <dd class="text-end font-semibold text-gray-900">{{ fullDate(booking!.startAt) }}</dd>
+              <dd class="text-end font-semibold text-gray-900">{{ fullDate(booking.startAt) }}</dd>
             </div>
             <div class="flex justify-between gap-3">
               <dt class="text-gray-500">الوقت</dt>
               <dd class="text-end font-semibold text-gray-900">
-                {{ timeRange(booking!.startAt, booking!.endAt) }}
+                {{ timeRange(booking.startAt, booking.endAt) }}
               </dd>
             </div>
             <div class="flex justify-between gap-3 border-t border-gray-200 pt-3">
               <dt class="text-gray-500">الإجمالي</dt>
               <dd class="text-end font-bold text-gray-900" data-numeric>
-                {{ money(booking!.priceMinor) }}
+                {{ money(booking.priceMinor) }}
               </dd>
             </div>
           </dl>
         </div>
 
-        <div v-if="booking!.status === 'pending'" class="surface flex items-start gap-3 p-4">
+        <div v-if="booking.status === 'pending'" class="surface flex items-start gap-3 p-4">
           <CalendarClock class="text-warning-700 mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
           <p class="text-sm leading-relaxed text-gray-600">
             حجزك بانتظار التأكيد من الفريق. سنتواصل معك قريباً.

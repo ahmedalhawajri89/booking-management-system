@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 /**
  * Section header.
  *
@@ -10,33 +10,24 @@
  * `sticky` is for the split layouts, where the header holds its position on
  * one side while its content scrolls past on the other.
  */
-withDefaults(
-  defineProps<{
-    eyebrow?: string
-    title: string
-    lede?: string
-    align?: 'center' | 'start' | 'end'
-    sticky?: boolean
-    /** For the sections that sit on a dark ground. */
-    tone?: 'default' | 'inverse'
-  }>(),
-  { align: 'center', sticky: false, tone: 'default' },
-)
+defineProps({
+  eyebrow: { type: String, required: false },
+  title: { type: String, required: true },
+  lede: { type: String, required: false },
+  align: { type: String, required: false, default: 'center' },
+  sticky: { type: Boolean, required: false, default: false },
+  tone: { type: String, required: false, default: 'default' },
+})
 
 const ALIGN = {
   center: 'mx-auto max-w-2xl text-center',
   start: 'max-w-2xl',
   end: 'max-w-2xl ms-auto text-end',
-} as const
+}
 </script>
 
 <template>
-  <header
-    :class="[
-      ALIGN[align],
-      sticky ? 'lg:sticky lg:top-28 lg:self-start' : 'mb-12 md:mb-16',
-    ]"
-  >
+  <header :class="[ALIGN[align], sticky ? 'lg:sticky lg:top-28 lg:self-start' : 'mb-12 md:mb-16']">
     <p
       v-if="eyebrow"
       v-reveal

@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { ref, toRef } from 'vue'
 import { X } from 'lucide-vue-next'
 import IconButton from './IconButton.vue'
@@ -8,14 +8,16 @@ import { useFocusTrap } from '@/composables/useFocusTrap'
  * Side sheet used for every detail and create surface, so the operator never
  * loses their place. Becomes a full-screen sheet below `sm`.
  */
-const props = withDefaults(
-  defineProps<{ open: boolean; title: string; subtitle?: string; width?: 'md' | 'lg' }>(),
-  { width: 'md' },
-)
+const props = defineProps({
+  open: { type: Boolean, required: true },
+  title: { type: String, required: true },
+  subtitle: { type: String, required: false },
+  width: { type: String, required: false, default: 'md' },
+})
 
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits(['close'])
 
-const panel = ref<HTMLElement | null>(null)
+const panel = ref(null)
 useFocusTrap(toRef(props, 'open'), panel, () => emit('close'))
 </script>
 
@@ -54,7 +56,7 @@ useFocusTrap(toRef(props, 'open'), panel, () => emit('close'))
 
         <footer
           v-if="$slots.footer"
-          class="sticky bottom-0 border-t border-gray-200 bg-surface px-5 py-3"
+          class="bg-surface sticky bottom-0 border-t border-gray-200 px-5 py-3"
         >
           <slot name="footer" />
         </footer>

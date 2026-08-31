@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, X } from 'lucide-vue-next'
@@ -29,7 +29,7 @@ const onHero = computed(() => overDark.value && !open.value)
 
 let ticking = false
 function measure() {
-  const stage = document.querySelector<HTMLElement>('[data-dark-stage]')
+  const stage = document.querySelector('[data-dark-stage]')
   // 64px is the bar's own height — it stops being "over" the stage once the
   // stage's bottom edge has passed under it.
   overDark.value = !!stage && stage.getBoundingClientRect().bottom > 64
@@ -45,7 +45,11 @@ function onScroll() {
 }
 
 // The stage belongs to the route's component, which mounts after this one.
-watch(() => route.fullPath, () => requestAnimationFrame(measure), { immediate: true })
+watch(
+  () => route.fullPath,
+  () => requestAnimationFrame(measure),
+  { immediate: true },
+)
 
 onMounted(() => {
   measure()
@@ -68,9 +72,7 @@ const LINKS = [
   <nav
     class="fixed top-0 z-50 w-full border-b transition-colors duration-300"
     :class="
-      onHero
-        ? 'border-transparent bg-transparent'
-        : 'border-border bg-surface/85 backdrop-blur-xl'
+      onHero ? 'border-transparent bg-transparent' : 'border-border bg-surface/85 backdrop-blur-xl'
     "
   >
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -83,14 +85,18 @@ const LINKS = [
             :key="l.href"
             :href="l.href"
             class="font-medium transition-colors"
-            :class="onHero ? 'text-white/70 hover:text-white' : 'text-fg-muted hover:text-primary-600'"
+            :class="
+              onHero ? 'text-white/70 hover:text-white' : 'text-fg-muted hover:text-primary-600'
+            "
           >
             {{ l.label }}
           </a>
           <RouterLink
             :to="auth.isAuthenticated ? '/app' : '/login'"
             class="font-medium transition-colors"
-            :class="onHero ? 'text-white/70 hover:text-white' : 'text-fg-muted hover:text-primary-600'"
+            :class="
+              onHero ? 'text-white/70 hover:text-white' : 'text-fg-muted hover:text-primary-600'
+            "
           >
             {{ auth.isAuthenticated ? 'لوحة التحكم' : 'تسجيل الدخول' }}
           </RouterLink>
@@ -108,7 +114,9 @@ const LINKS = [
           <button
             type="button"
             class="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)] md:hidden"
-            :class="onHero ? 'text-white hover:bg-white/10' : 'text-fg-muted hover:bg-surface-sunken'"
+            :class="
+              onHero ? 'text-white hover:bg-white/10' : 'text-fg-muted hover:bg-surface-sunken'
+            "
             :aria-expanded="open"
             aria-controls="mobile-menu"
             :aria-label="open ? 'إغلاق القائمة' : 'فتح القائمة'"

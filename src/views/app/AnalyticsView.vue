@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { subDays, startOfDay } from 'date-fns'
@@ -11,7 +11,6 @@ import {
   UserX,
   Wallet,
 } from 'lucide-vue-next'
-import type { ChartConfiguration } from 'chart.js'
 import BaseTabs from '@/components/ui/BaseTabs.vue'
 import ErrorState from '@/components/ui/ErrorState.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
@@ -50,7 +49,7 @@ const RANGES = [
   { value: '7', label: '٧ أيام' },
   { value: '30', label: '٣٠ يوماً' },
   { value: '90', label: '٩٠ يوماً' },
-] as const
+]
 
 const days = ref(String(route.query.range ?? '30'))
 watch(days, (v) => router.replace({ query: { ...route.query, range: v } }))
@@ -72,11 +71,11 @@ const FROM_HOUR = 8
 const TO_HOUR = 20
 const heatmap = computed(() => demandHeatmap(store.items, range.value, FROM_HOUR, TO_HOUR))
 
-const pct = (n: number) => `${Math.round(n * 100)}%`
+const pct = (n) => `${Math.round(n * 100)}%`
 
 /* --------------------------------------------------------------- charts */
 
-const revenueChart = computed<ChartConfiguration>(() => {
+const revenueChart = computed(() => {
   const c = chartColors()
   return {
     type: 'line',
@@ -122,16 +121,14 @@ const revenueChart = computed<ChartConfiguration>(() => {
   }
 })
 
-const CHANNEL_LABELS = { online: 'الموقع', phone: 'الهاتف', walk_in: 'الاستقبال' } as const
+const CHANNEL_LABELS = { online: 'الموقع', phone: 'الهاتف', walk_in: 'الاستقبال' }
 
-const channelChart = computed<ChartConfiguration>(() => {
+const channelChart = computed(() => {
   const c = chartColors()
   return {
     type: 'doughnut',
     data: {
-      labels: Object.keys(channels.value).map(
-        (k) => CHANNEL_LABELS[k as keyof typeof CHANNEL_LABELS],
-      ),
+      labels: Object.keys(channels.value).map((k) => CHANNEL_LABELS[k]),
       datasets: [
         {
           data: Object.values(channels.value),
@@ -156,16 +153,14 @@ const STATUS_LABELS = {
   completed: 'مكتمل',
   cancelled: 'ملغى',
   no_show: 'لم يحضر',
-} as const
+}
 
-const statusChart = computed<ChartConfiguration>(() => {
+const statusChart = computed(() => {
   const c = chartColors()
   return {
     type: 'bar',
     data: {
-      labels: Object.keys(statuses.value).map(
-        (k) => STATUS_LABELS[k as keyof typeof STATUS_LABELS],
-      ),
+      labels: Object.keys(statuses.value).map((k) => STATUS_LABELS[k]),
       datasets: [
         {
           data: Object.values(statuses.value),
@@ -187,7 +182,7 @@ const statusChart = computed<ChartConfiguration>(() => {
   }
 })
 
-const servicesChart = computed<ChartConfiguration>(() => {
+const servicesChart = computed(() => {
   const c = chartColors()
   return {
     type: 'bar',

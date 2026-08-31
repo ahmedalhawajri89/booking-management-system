@@ -1,6 +1,6 @@
 # UI/UX Audit — Booking Management System
 
-**Audited build:** Vue 3.5 · TypeScript · Vite 6 · Tailwind CSS 4 · Pinia · Vue Router 4
+**Audited build:** Vue 3.5 · JavaScript · Vite 6 · Tailwind CSS 4 · Pinia · Vue Router 4
 **Scope:** 23 source files · 2,221 LOC · 6 routes · 12 components
 **Method:** static inspection of every route, component, store and type; runtime walkthrough of all six routes and the full booking wizard; measured token/consistency counts across the codebase.
 
@@ -97,7 +97,7 @@ Radius and elevation are chosen per-element rather than by meaning, so nothing c
 ### 3.1 P0 — The domain model is display-shaped, not data-shaped
 
 ```ts
-// src/types/index.ts — as it exists today
+// src/types/index.js — as it exists today
 interface Service       { price: string; duration: string; /* "150 ر.س", "30 دقيقة" */ }
 type BookingStatus =    'مكتمل' | 'قادم' | 'ملغي'   // Arabic labels used as the enum
 interface BookingRecord { id; customer: string; service: string; date: string; status }
@@ -211,7 +211,7 @@ Total ARIA/`role` attributes in the entire codebase: **11**, across 4 of 23 file
 - **Token layer exists and works.** `--color-primary-*`, `--color-accent-*`, warm neutral override and gradient recipes are centralised in `main.css`. Re-theming is a one-file edit.
 - **Clean architecture.** `views / components / stores / data / types / router` separation is correct and the store is a proper state machine.
 - **Zero external runtime assets.** Avatars and brand marks are inline SVG components.
-- **Typed end-to-end.** `vue-tsc` builds clean with `noUnusedLocals` and `noUnusedParameters` on.
+- **Documented end-to-end.** The domain model lives as JSDoc `@typedef`s in `src/types/index.js`, which editors read through `jsconfig.json`.
 - **Motion is restrained** and respects `prefers-reduced-motion`.
 - **Route-level code splitting** is already in place.
 

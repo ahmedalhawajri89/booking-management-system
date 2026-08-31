@@ -1,22 +1,17 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
-import type { BookingStatus, PaymentStatus } from '@/types'
-import { BOOKING_STATUS, PAYMENT_STATUS, type Tone } from '@/lib/status'
+import { BOOKING_STATUS, PAYMENT_STATUS } from '@/lib/status'
 
 /**
  * Status is never colour-alone: this renders tone + label + icon together,
  * so the meaning survives greyscale, low vision and colour blindness.
  */
-const props = withDefaults(
-  defineProps<{
-    status?: BookingStatus
-    payment?: PaymentStatus
-    size?: 'sm' | 'md'
-    /** Hide the text on very narrow layouts — the icon keeps a title attribute. */
-    iconOnly?: boolean
-  }>(),
-  { size: 'md', iconOnly: false },
-)
+const props = defineProps({
+  status: { type: null, required: false },
+  payment: { type: null, required: false },
+  size: { type: String, required: false, default: 'md' },
+  iconOnly: { type: Boolean, required: false, default: false },
+})
 
 const meta = computed(() =>
   props.status
@@ -26,7 +21,7 @@ const meta = computed(() =>
       : null,
 )
 
-const TONE: Record<Tone, string> = {
+const TONE = {
   success: 'bg-success-50 text-success-700 border-success-100',
   warning: 'bg-warning-50 text-warning-700 border-warning-100',
   danger: 'bg-danger-50 text-danger-700 border-danger-100',

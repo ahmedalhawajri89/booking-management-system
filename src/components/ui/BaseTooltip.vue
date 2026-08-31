@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { onBeforeUnmount, ref, useId } from 'vue'
 
 /**
@@ -9,16 +9,17 @@ import { onBeforeUnmount, ref, useId } from 'vue'
  * Positioned with getBoundingClientRect into a fixed-position node instead of
  * a positioning library: these are small labels near controls we place.
  */
-const props = withDefaults(
-  defineProps<{ text: string; placement?: 'top' | 'bottom'; delay?: number }>(),
-  { placement: 'top', delay: 400 },
-)
+const props = defineProps({
+  text: { type: String, required: true },
+  placement: { type: String, required: false, default: 'top' },
+  delay: { type: Number, required: false, default: 400 },
+})
 
 const id = useId()
 const visible = ref(false)
 const coords = ref({ top: 0, left: 0 })
-const anchor = ref<HTMLElement | null>(null)
-let timer: ReturnType<typeof setTimeout> | undefined
+const anchor = ref(null)
+let timer
 
 function place() {
   const el = anchor.value?.firstElementChild ?? anchor.value
@@ -53,7 +54,7 @@ onBeforeUnmount(() => clearTimeout(timer))
     @pointerenter="show"
     @pointerleave="hide"
     @focusin="
-      place();
+      place()
       visible = true
     "
     @focusout="hide"

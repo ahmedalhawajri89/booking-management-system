@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { ref, toRef } from 'vue'
 import { X } from 'lucide-vue-next'
 import IconButton from './IconButton.vue'
@@ -12,30 +12,26 @@ import { useFocusTrap } from '@/composables/useFocusTrap'
  * plain dialog does not — destructive confirmations earn the interruption,
  * ordinary forms do not.
  */
-const props = withDefaults(
-  defineProps<{
-    open: boolean
-    title: string
-    description?: string
-    size?: 'sm' | 'md' | 'lg'
-    role?: 'dialog' | 'alertdialog'
-    /** Off for anything with unsaved input, where a stray click loses work. */
-    closeOnBackdrop?: boolean
-    dismissible?: boolean
-  }>(),
-  { size: 'sm', role: 'dialog', closeOnBackdrop: true, dismissible: true },
-)
+const props = defineProps({
+  open: { type: Boolean, required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: false },
+  size: { type: String, required: false, default: 'sm' },
+  role: { type: String, required: false, default: 'dialog' },
+  closeOnBackdrop: { type: Boolean, required: false, default: true },
+  dismissible: { type: Boolean, required: false, default: true },
+})
 
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits(['close'])
 
-const panel = ref<HTMLElement | null>(null)
+const panel = ref(null)
 useFocusTrap(toRef(props, 'open'), panel, () => emit('close'))
 
 const SIZE = {
   sm: 'max-w-sm',
   md: 'max-w-lg',
   lg: 'max-w-2xl',
-} as const
+}
 </script>
 
 <template>
@@ -59,7 +55,13 @@ const SIZE = {
               <h2 class="type-h3 text-fg">{{ title }}</h2>
               <p v-if="description" class="type-body text-fg-muted mt-2">{{ description }}</p>
             </div>
-            <IconButton v-if="dismissible" :icon="X" label="إغلاق" size="sm" @click="emit('close')" />
+            <IconButton
+              v-if="dismissible"
+              :icon="X"
+              label="إغلاق"
+              size="sm"
+              @click="emit('close')"
+            />
           </div>
 
           <div v-if="$slots.default" class="mt-4">

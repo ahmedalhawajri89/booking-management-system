@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Lock, Mail } from 'lucide-vue-next'
@@ -30,7 +30,7 @@ async function submit() {
   try {
     await auth.signIn(email.value, password.value)
     toast.success('أهلاً بعودتك')
-    const redirect = (route.query.redirect as string) || '/app'
+    const redirect = route.query.redirect || '/app'
     await router.push(redirect)
   } catch (e) {
     // Deliberately not "no account with that email": that would let anyone

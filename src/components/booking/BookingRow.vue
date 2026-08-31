@@ -1,7 +1,6 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
-import type { Booking } from '@/types'
 import { useBookingsStore } from '@/stores/bookings'
 import { money, relativeDayTime, timeRange } from '@/lib/format'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
@@ -11,8 +10,11 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
  * `sm` up. Same data, same target — the whole thing is one button so the
  * keyboard path is a single stop.
  */
-const props = defineProps<{ booking: Booking; showDay?: boolean }>()
-defineEmits<{ open: [id: string] }>()
+const props = defineProps({
+  booking: { type: null, required: true },
+  showDay: { type: Boolean, required: false },
+})
+defineEmits(['open'])
 
 const bookings = useBookingsStore()
 const view = computed(() => bookings.hydrate(props.booking))

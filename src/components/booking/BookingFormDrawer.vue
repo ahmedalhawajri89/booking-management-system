@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed, ref, watch } from 'vue'
 import { startOfDay } from 'date-fns'
 import { Phone, User } from 'lucide-vue-next'
@@ -13,32 +13,32 @@ import { useCustomersStore } from '@/stores/customers'
 import { businessHours, resources, services } from '@/data/catalog'
 import { generateSlots } from '@/lib/availability'
 import { money, duration } from '@/lib/format'
-import type { PaymentStatus } from '@/types'
 
 /**
  * Operator create/reschedule on a single surface — no stepper. Availability
  * recomputes live, so an impossible booking cannot be submitted.
  */
-const props = withDefaults(defineProps<{ open: boolean; rescheduleId?: string | null }>(), {
-  rescheduleId: null,
+const props = defineProps({
+  open: { type: Boolean, required: true },
+  rescheduleId: { type: [String, null], required: false, default: null },
 })
-const emit = defineEmits<{ close: []; created: [id: string] }>()
+const emit = defineEmits(['close', 'created'])
 
 const bookings = useBookingsStore()
 const customers = useCustomersStore()
 
-const serviceId = ref(services[0]!.id)
-const resourceId = ref(services[0]!.resourceIds[0]!)
+const serviceId = ref(services[0].id)
+const resourceId = ref(services[0].resourceIds[0])
 const date = ref(startOfDay(new Date()))
-const startAt = ref<string | null>(null)
+const startAt = ref(null)
 const phone = ref('')
 const name = ref('')
-const paymentStatus = ref<PaymentStatus>('unpaid')
+const paymentStatus = ref('unpaid')
 const notes = ref('')
 const submitting = ref(false)
 const touched = ref(false)
 
-const service = computed(() => services.find((s) => s.id === serviceId.value)!)
+const service = computed(() => services.find((s) => s.id === serviceId.value))
 const allowedResources = computed(() =>
   resources.filter((r) => service.value.resourceIds.includes(r.id)),
 )
@@ -76,7 +76,7 @@ watch(matched, (c) => {
 })
 
 watch(service, (s) => {
-  if (!s.resourceIds.includes(resourceId.value)) resourceId.value = s.resourceIds[0]!
+  if (!s.resourceIds.includes(resourceId.value)) resourceId.value = s.resourceIds[0]
   startAt.value = null
 })
 watch([date, resourceId], () => {
@@ -106,7 +106,7 @@ async function submit() {
     if (props.rescheduleId) {
       // The grid does not offer taken slots, so this only fires if the slot
       // was claimed between the grid rendering and this submit.
-      if (!bookings.reschedule(props.rescheduleId, startAt.value!)) {
+      if (!bookings.reschedule(props.rescheduleId, startAt.value)) {
         toast.error('هذا الوقت لم يعد متاحاً — اختر وقتاً آخر')
         return
       }
@@ -118,7 +118,7 @@ async function submit() {
       customerId: customer.id,
       serviceId: serviceId.value,
       resourceId: resourceId.value,
-      startAt: startAt.value!,
+      startAt: startAt.value,
       status: 'confirmed',
       paymentStatus: paymentStatus.value,
       channel: 'phone',
@@ -132,7 +132,7 @@ async function submit() {
   }
 }
 
-const PAYMENTS: { value: PaymentStatus; label: string }[] = [
+const PAYMENTS = [
   { value: 'unpaid', label: 'غير مدفوع' },
   { value: 'deposit_paid', label: 'عربون' },
   { value: 'paid', label: 'مدفوع' },

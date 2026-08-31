@@ -1,25 +1,20 @@
-<script setup lang="ts">
-import type { LucideIcon } from '@/types'
-
+<script setup>
 /**
  * Three genuinely different situations, three different messages.
  * "No data" is never an acceptable empty state.
  */
-withDefaults(
-  defineProps<{
-    variant?: 'first-run' | 'no-results' | 'error'
-    icon: LucideIcon
-    title: string
-    description: string
-  }>(),
-  { variant: 'first-run' },
-)
+defineProps({
+  variant: { type: String, required: false, default: 'first-run' },
+  icon: { type: null, required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+})
 
 const TONE = {
   'first-run': 'bg-primary-50 text-primary-600',
   'no-results': 'bg-gray-100 text-gray-500',
   error: 'bg-danger-50 text-danger-700',
-} as const
+}
 </script>
 
 <template>

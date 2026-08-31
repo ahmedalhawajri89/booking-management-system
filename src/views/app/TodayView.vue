@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 import { CalendarCheck, PartyPopper, RefreshCw, TriangleAlert } from 'lucide-vue-next'
 import { useBookingsStore } from '@/stores/bookings'
@@ -14,7 +14,7 @@ import DayTimeline from '@/components/booking/DayTimeline.vue'
  * The operator's working surface, ordered by the questions actually asked:
  * what needs me → what is the shape of my day → what is next → how full am I.
  */
-const emit = defineEmits<{ openBooking: [id: string] }>()
+const emit = defineEmits(['openBooking'])
 const store = useBookingsStore()
 
 const attention = computed(() => store.attention)

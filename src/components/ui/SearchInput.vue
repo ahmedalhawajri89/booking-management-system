@@ -1,14 +1,15 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { ref } from 'vue'
 import { Search, X } from 'lucide-vue-next'
 
-withDefaults(defineProps<{ modelValue: string; placeholder?: string; shortcut?: boolean }>(), {
-  placeholder: 'ابحث…',
-  shortcut: false,
+defineProps({
+  modelValue: { type: String, required: true },
+  placeholder: { type: String, required: false, default: 'ابحث…' },
+  shortcut: { type: Boolean, required: false, default: false },
 })
 
-const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
-const input = ref<HTMLInputElement | null>(null)
+const emit = defineEmits(['update:modelValue'])
+const input = ref(null)
 
 defineExpose({ focus: () => input.value?.focus() })
 </script>
@@ -26,8 +27,8 @@ defineExpose({ focus: () => input.value?.focus() })
       :value="modelValue"
       :placeholder="placeholder"
       :aria-label="placeholder"
-      class="focus:border-primary-400 h-10 w-full rounded-[var(--radius-md)] border border-gray-200 bg-surface ps-9 pe-9 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none"
-      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      class="focus:border-primary-400 bg-surface h-10 w-full rounded-[var(--radius-md)] border border-gray-200 ps-9 pe-9 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none"
+      @input="emit('update:modelValue', $event.target.value)"
     />
     <button
       v-if="modelValue"

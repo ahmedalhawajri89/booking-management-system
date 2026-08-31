@@ -1,12 +1,6 @@
-<script setup lang="ts">
+<script setup>
 import { computed, useId } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
-
-export interface SelectOption {
-  value: string
-  label: string
-  disabled?: boolean
-}
 
 /**
  * Wraps a native <select> rather than building a listbox. The native control
@@ -14,24 +8,20 @@ export interface SelectOption {
  * for free — none of which a custom widget reproduces without real work.
  * Styling matches BaseInput so the two sit together in a form.
  */
-const props = withDefaults(
-  defineProps<{
-    modelValue: string
-    options: SelectOption[]
-    label: string
-    /** Hides the label visually but keeps it for screen readers. */
-    hideLabel?: boolean
-    placeholder?: string
-    hint?: string
-    error?: string
-    required?: boolean
-    disabled?: boolean
-    size?: 'sm' | 'md'
-  }>(),
-  { hideLabel: false, required: false, disabled: false, size: 'md' },
-)
+const props = defineProps({
+  modelValue: { type: String, required: true },
+  options: { type: Array, required: true },
+  label: { type: String, required: true },
+  hideLabel: { type: Boolean, required: false, default: false },
+  placeholder: { type: String, required: false },
+  hint: { type: String, required: false },
+  error: { type: String, required: false },
+  required: { type: Boolean, required: false, default: false },
+  disabled: { type: Boolean, required: false, default: false },
+  size: { type: String, required: false, default: 'md' },
+})
 
-defineEmits<{ 'update:modelValue': [value: string] }>()
+defineEmits(['update:modelValue'])
 
 const id = useId()
 const hintId = computed(() => (props.hint ? `${id}-hint` : undefined))
@@ -40,7 +30,7 @@ const describedBy = computed(
   () => [errorId.value, hintId.value].filter(Boolean).join(' ') || undefined,
 )
 
-const SIZE = { sm: 'h-9 text-[13px]', md: 'h-10 text-sm' } as const
+const SIZE = { sm: 'h-9 text-[13px]', md: 'h-10 text-sm' }
 </script>
 
 <template>
@@ -64,15 +54,10 @@ const SIZE = { sm: 'h-9 text-[13px]', md: 'h-10 text-sm' } as const
         :aria-describedby="describedBy"
         class="focus:border-primary-400 bg-surface text-fg disabled:bg-surface-sunken disabled:text-fg-subtle w-full appearance-none rounded-[var(--radius-md)] border px-3 pe-9 transition-colors focus:outline-none"
         :class="[SIZE[size], error ? 'border-danger-700/50' : 'border-border']"
-        @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+        @change="$emit('update:modelValue', $event.target.value)"
       >
         <option v-if="placeholder" value="" disabled>{{ placeholder }}</option>
-        <option
-          v-for="opt in options"
-          :key="opt.value"
-          :value="opt.value"
-          :disabled="opt.disabled"
-        >
+        <option v-for="opt in options" :key="opt.value" :value="opt.value" :disabled="opt.disabled">
           {{ opt.label }}
         </option>
       </select>

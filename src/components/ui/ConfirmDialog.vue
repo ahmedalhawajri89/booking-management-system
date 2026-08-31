@@ -1,21 +1,18 @@
-<script setup lang="ts">
+<script setup>
 import BaseButton from './BaseButton.vue'
 import BaseModal from './BaseModal.vue'
 
 /** Confirmation always names the object being acted on — never "Are you sure?". */
-withDefaults(
-  defineProps<{
-    open: boolean
-    title: string
-    message: string
-    confirmLabel?: string
-    cancelLabel?: string
-    tone?: 'danger' | 'primary'
-  }>(),
-  { confirmLabel: 'تأكيد', cancelLabel: 'تراجع', tone: 'danger' },
-)
+defineProps({
+  open: { type: Boolean, required: true },
+  title: { type: String, required: true },
+  message: { type: String, required: true },
+  confirmLabel: { type: String, required: false, default: 'تأكيد' },
+  cancelLabel: { type: String, required: false, default: 'تراجع' },
+  tone: { type: String, required: false, default: 'danger' },
+})
 
-const emit = defineEmits<{ confirm: []; cancel: [] }>()
+const emit = defineEmits(['confirm', 'cancel'])
 
 // Cancel is deliberately first in the DOM, so the focus trap lands there:
 // a stray Enter on a destructive dialog should back out, not go through.

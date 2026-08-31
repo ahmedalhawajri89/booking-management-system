@@ -1,14 +1,16 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { CalendarX2 } from 'lucide-vue-next'
-import type { Slot } from '@/types'
 import EmptyState from '@/components/ui/EmptyState.vue'
 
 /**
  * Taken slots stay visible but disabled — absence is information. Hiding them
  * would make a fully-booked day look identical to a closed one.
  */
-defineProps<{ slots: Slot[]; modelValue: string | null }>()
-const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+defineProps({
+  slots: { type: Array, required: true },
+  modelValue: { type: [String, null], required: true },
+})
+const emit = defineEmits(['update:modelValue'])
 </script>
 
 <template>
@@ -46,7 +48,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
         modelValue === slot.startAt
           ? 'border-primary-600 bg-primary-600 text-white'
           : slot.state === 'available'
-            ? 'hover:border-primary-300 hover:bg-primary-50 border-gray-200 bg-surface text-gray-700'
+            ? 'hover:border-primary-300 hover:bg-primary-50 bg-surface border-gray-200 text-gray-700'
             : 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300 line-through',
       ]"
       @click="emit('update:modelValue', slot.startAt)"

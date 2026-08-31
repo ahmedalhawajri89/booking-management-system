@@ -1,7 +1,6 @@
-<script setup lang="ts">
+<script setup>
 import { ArrowLeft, PhoneOff, CalendarX2, NotebookPen, UserX } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
-import type { LucideIcon } from '@/types'
 
 /**
  * Split layout: the header holds still on one side while the pains scroll
@@ -11,7 +10,7 @@ import type { LucideIcon } from '@/types'
  * Each pain maps to one specific mechanism — no claim appears here that the
  * product cannot actually deliver.
  */
-const ROWS: { icon: LucideIcon; pain: string; fix: string }[] = [
+const ROWS = [
   {
     icon: PhoneOff,
     pain: 'المواعيد تُحجز بمكالمة، وتُنسى بمكالمة.',
@@ -59,7 +58,9 @@ const ROWS: { icon: LucideIcon; pain: string; fix: string }[] = [
             >
               <component :is="row.icon" class="h-4.5 w-4.5" aria-hidden="true" />
             </span>
-            <p class="text-fg-subtle decoration-border pt-1.5 text-[15px] leading-relaxed line-through">
+            <p
+              class="text-fg-subtle decoration-border pt-1.5 text-[15px] leading-relaxed line-through"
+            >
               {{ row.pain }}
             </p>
           </div>

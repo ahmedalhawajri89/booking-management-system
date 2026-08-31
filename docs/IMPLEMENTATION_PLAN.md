@@ -10,8 +10,8 @@ Ordered so that each phase is usable on its own and nothing is built twice. Depe
 
 - Rewrite `types/` per IA §2 — ISO dates, `priceMinor`, `durationMin`, machine-value statuses
 - `Customer`, `Resource`, `BusinessHours`, `BookingEvent` entities
-- `lib/availability.ts` — the slot engine and conflict detection
-- `lib/format.ts` — `Intl` money/date/time, one source of truth
+- `lib/availability.js` — the slot engine and conflict detection
+- `lib/format.js` — `Intl` money/date/time, one source of truth
 - Seed data: ~30 bookings across past/today/future, 12 customers, 3 services, 2 resources — enough for empty, sparse and dense states to be real
 - Pinia stores: `bookings`, `customers`, `services`, `auth` — persisted to `localStorage` behind a repository interface so a real API can replace it without touching components
 
@@ -107,7 +107,7 @@ Keyboard path · focus traps · live regions · labels and error wiring · contr
 
 ## Phase 13 — QA *(P0)*
 
-`vue-tsc` clean · zero console errors · every route and flow walked · automated screenshots at four widths · axe pass · final visual review against DS §13.
+`vitest` green · `vite build` clean · zero console errors · every route and flow walked · automated screenshots at four widths · axe pass · final visual review against DS §13.
 
 ---
 

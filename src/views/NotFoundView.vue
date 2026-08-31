@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Compass } from 'lucide-vue-next'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { useRouter } from 'vue-router'

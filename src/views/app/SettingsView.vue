@@ -1,9 +1,8 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, ref } from 'vue'
 import { Plus, RotateCcw } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
-import type { BusinessHours, Resource } from '@/types'
-import { businessHours, resources, services, type ServiceRow } from '@/data/catalog'
+import { businessHours, resources, services } from '@/data/catalog'
 import { duration, money } from '@/lib/format'
 import { SERVICE_ICON_KEYS, SERVICE_ICON_LABELS, iconFor } from '@/lib/icons'
 import { isDemoBackend, repository } from '@/data/repository'
@@ -45,10 +44,10 @@ onMounted(() => settings.load())
 
 /* -------------------------------------------------------------- services */
 
-const editing = ref<ServiceRow | null>(null)
+const editing = ref(null)
 const isNew = ref(false)
 
-function editService(id: string) {
+function editService(id) {
   const s = services.find((x) => x.id === id)
   if (!s) return
   isNew.value = false
@@ -72,10 +71,10 @@ function addService() {
 
 // BaseInput speaks strings; these adapt the numeric fields, and clamp on the
 // way in so a blank or negative entry cannot reach the model.
-function numberField(key: 'durationMin' | 'bufferMin', min: number) {
+function numberField(key, min) {
   return computed({
     get: () => String(editing.value?.[key] ?? ''),
-    set: (v: string) => {
+    set: (v) => {
       if (editing.value) editing.value[key] = Math.max(min, Math.round(Number(v)) || min)
     },
   })
@@ -87,7 +86,7 @@ const bufferInput = numberField('bufferMin', 0)
 /** Price is entered in riyals; the model stores halalas everywhere. */
 const priceMajor = computed({
   get: () => String((editing.value?.priceMinor ?? 0) / 100),
-  set: (v: string) => {
+  set: (v) => {
     if (editing.value) editing.value.priceMinor = Math.max(0, Math.round(Number(v) * 100) || 0)
   },
 })
@@ -107,7 +106,7 @@ function commitService() {
   editing.value = null
 }
 
-function toggleResourceOn(row: ServiceRow, resourceId: string) {
+function toggleResourceOn(row, resourceId) {
   const i = row.resourceIds.indexOf(resourceId)
   if (i === -1) row.resourceIds.push(resourceId)
   else row.resourceIds.splice(i, 1)
@@ -115,7 +114,7 @@ function toggleResourceOn(row: ServiceRow, resourceId: string) {
 
 /* ----------------------------------------------------------------- hours */
 
-const draftHours = ref<BusinessHours[]>([])
+const draftHours = ref([])
 const hoursDirty = computed(
   () => JSON.stringify(draftHours.value) !== JSON.stringify(businessHours),
 )
@@ -139,7 +138,7 @@ function commitHours() {
 
 /* ------------------------------------------------------------- resources */
 
-const editingResource = ref<Resource | null>(null)
+const editingResource = ref(null)
 
 function commitResource() {
   if (!editingResource.value || editingResource.value.name.trim().length < 1) return
@@ -182,11 +181,7 @@ async function resetData() {
       <ul class="divide-border divide-y">
         <li v-for="s in services" :key="s.id" class="flex items-center gap-3 px-4 py-3">
           <component :is="s.icon" class="text-fg-subtle h-5 w-5 shrink-0" aria-hidden="true" />
-          <button
-            type="button"
-            class="min-w-0 flex-1 text-start"
-            @click="editService(s.id)"
-          >
+          <button type="button" class="min-w-0 flex-1 text-start" @click="editService(s.id)">
             <p class="text-fg truncate text-sm font-semibold" :class="!s.isActive && 'opacity-50'">
               {{ s.name }}
             </p>
@@ -209,9 +204,7 @@ async function resetData() {
     <section v-else-if="tab === 'hours'" class="surface overflow-hidden">
       <header class="border-border border-b px-4 py-3">
         <h2 class="text-fg text-sm font-bold">ساعات العمل</h2>
-        <p class="text-fg-subtle mt-0.5 text-xs">
-          الأوقات المعروضة للعملاء تُحسب من هنا مباشرةً.
-        </p>
+        <p class="text-fg-subtle mt-0.5 text-xs">الأوقات المعروضة للعملاء تُحسب من هنا مباشرةً.</p>
       </header>
 
       <ul class="divide-border divide-y">

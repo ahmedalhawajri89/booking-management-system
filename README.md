@@ -48,7 +48,9 @@ Most booking demos store a time as text and let you double-book. This one does n
 
 ## Tech stack
 
-**Vue 3.5** with `<script setup>` · **TypeScript** · **Vite 6** · **Tailwind CSS 4** (`@theme` tokens) · **Pinia** · **Vue Router 4** with route guards · **date-fns** with the Arabic locale · **lucide-vue-next** · **vue-sonner** · **Playwright** for the end-to-end run.
+**Vue 3.5** with `<script setup>` · **JavaScript** (ES modules, JSDoc types) · **Vite 6** · **Tailwind CSS 4** (`@theme` tokens) · **Pinia** · **Vue Router 4** with route guards · **date-fns** with the Arabic locale · **Chart.js** via **vue-chartjs** · **lucide-vue-next** · **vue-sonner** · **Vitest** for the unit suite · **Playwright** for the end-to-end run.
+
+The domain model is documented as JSDoc `@typedef`s in `src/types/index.js`. Editors read them through `jsconfig.json`, so a wrong property name still gets flagged while writing — without a compile step in the build.
 
 Data lives behind a repository interface, currently backed by `localStorage`. Swapping in a real HTTP API means replacing one file — nothing above it changes.
 
@@ -77,16 +79,16 @@ No backend or database is required. Seed data regenerates for the current day on
 
 ```
 src/
-  types/index.ts            domain model — the source of truth
-  lib/availability.ts       slot generation, overlap and occupancy
-  data/repository.ts        persistence seam (localStorage today, HTTP later)
-  data/seed.ts              realistic seed data, re-dated daily
-  stores/bookings.ts        Pinia store: queries, mutations, undo
+  types/index.js            domain model as JSDoc typedefs — the source of truth
+  lib/availability.js       slot generation, overlap and occupancy
+  data/repository.js        persistence seam (localStorage today, HTTP later)
+  data/seed.js              realistic seed data, re-dated daily
+  stores/bookings.js        Pinia store: queries, mutations, undo
   views/                    public pages and the /app operator console
   components/booking/       drawers, timeline, slot picker
   components/marketing/     landing page sections
   components/ui/            base button, input, drawer, badge
-  directives/reveal.ts      scroll-reveal, one shared IntersectionObserver
+  directives/reveal.js      scroll-reveal, one shared IntersectionObserver
 docs/
   UI_UX_AUDIT.md            what was wrong and why
   INFORMATION_ARCHITECTURE.md
@@ -118,7 +120,7 @@ Licensed under the MIT License.
 
 الأوقات مخزّنة بصيغة ISO 8601 والمبالغ بالوحدات الصغرى والحالات بقيم برمجية — وهذا ما يجعل التقويم والفلاتر والمجاميع ممكنة أصلاً.
 
-**التقنيات:** Vue 3 و TypeScript و Tailwind CSS 4 و Pinia و Vite، مع اختبارات Playwright. طبقة البيانات معزولة خلف واجهة واحدة، فاستبدال التخزين المحلي بـ API حقيقي يتطلب تعديل ملف واحد فقط.
+**التقنيات:** Vue 3 و JavaScript و Tailwind CSS 4 و Pinia و Vite، مع اختبارات Vitest و Playwright. طبقة البيانات معزولة خلف واجهة واحدة، فاستبدال التخزين المحلي بـ API حقيقي يتطلب تعديل ملف واحد فقط.
 
 المشروع مرفق بتوثيق مكتوب: تدقيق تجربة المستخدم، معمارية المعلومات، ونظام التصميم.
 

@@ -1,21 +1,16 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 
 /**
  * Determinate bar. Extracted from the occupancy meter in TodayView so the
  * analytics screen can reuse the same shape, ARIA and colour thresholds.
  */
-const props = withDefaults(
-  defineProps<{
-    /** 0–100. Clamped, so a bad computation can't paint outside the track. */
-    value: number
-    label: string
-    size?: 'sm' | 'md'
-    /** 'auto' colours by load: calm when there's room, warm when there isn't. */
-    tone?: 'auto' | 'primary' | 'success' | 'warning' | 'danger'
-  }>(),
-  { size: 'md', tone: 'primary' },
-)
+const props = defineProps({
+  value: { type: Number, required: true },
+  label: { type: String, required: true },
+  size: { type: String, required: false, default: 'md' },
+  tone: { type: String, required: false, default: 'primary' },
+})
 
 const pct = computed(() => Math.max(0, Math.min(100, Math.round(props.value))))
 
@@ -24,7 +19,7 @@ const FILL = {
   success: 'bg-success-700',
   warning: 'bg-warning-700',
   danger: 'bg-danger-700',
-} as const
+}
 
 const resolved = computed(() => {
   if (props.tone !== 'auto') return FILL[props.tone]
@@ -33,7 +28,7 @@ const resolved = computed(() => {
   return FILL.primary
 })
 
-const SIZE = { sm: 'h-1.5', md: 'h-2' } as const
+const SIZE = { sm: 'h-1.5', md: 'h-2' }
 </script>
 
 <template>

@@ -1,24 +1,16 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { ref } from 'vue'
 import { CalendarDays, ListChecks, PanelRightOpen, Sun } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
-import type { LucideIcon } from '@/types'
 
-/**
- * Tabbed product tour. The panels are schematic recreations built from the same
- * tokens as the real screens — accurate about layout and hierarchy without
- * shipping screenshots that go stale the moment the UI changes.
- */
-type Key = 'today' | 'calendar' | 'bookings' | 'detail'
-
-const TABS: { key: Key; label: string; icon: LucideIcon; note: string }[] = [
+const TABS = [
   { key: 'today', label: 'اليوم', icon: Sun, note: 'ما يحتاج إجراءً، ثم يومك كخط زمني.' },
   { key: 'calendar', label: 'التقويم', icon: CalendarDays, note: 'يوم وقائمة، بألوان الحالة.' },
   { key: 'bookings', label: 'الحجوزات', icon: ListChecks, note: 'بحث ومرشّحات فورية.' },
   { key: 'detail', label: 'تفاصيل الحجز', icon: PanelRightOpen, note: 'درج واحد يجمع كل شيء.' },
 ]
 
-const active = ref<Key>('today')
+const active = ref('today')
 
 // A salon, deliberately: the hero board is a clinic with its own cast. Reusing
 // one set of names made two unrelated panels on the same page look like the
@@ -30,7 +22,7 @@ const ROWS = [
   { name: 'أروى القرني', service: 'عناية بالأظافر', tone: 'info', status: 'مؤكد' },
 ]
 
-const TONE: Record<string, string> = {
+const TONE = {
   success: 'bg-success-50 text-success-700 border-success-100',
   info: 'bg-info-50 text-info-700 border-info-100',
   warning: 'bg-warning-50 text-warning-700 border-warning-100',
@@ -81,7 +73,7 @@ const TONE: Record<string, string> = {
         v-reveal.scale="80"
         class="elev-overlay overflow-hidden rounded-[var(--radius-xl)] border border-gray-200 bg-gray-50"
       >
-        <div class="flex items-center gap-2 border-b border-gray-200 bg-surface px-4 py-3">
+        <div class="bg-surface flex items-center gap-2 border-b border-gray-200 px-4 py-3">
           <span class="h-2.5 w-2.5 rounded-full bg-gray-200" />
           <span class="h-2.5 w-2.5 rounded-full bg-gray-200" />
           <span class="h-2.5 w-2.5 rounded-full bg-gray-200" />
@@ -99,11 +91,11 @@ const TONE: Record<string, string> = {
                     <div
                       v-for="n in 3"
                       :key="n"
-                      class="border-warning-100 h-8 rounded-[var(--radius-md)] border bg-surface"
+                      class="border-warning-100 bg-surface h-8 rounded-[var(--radius-md)] border"
                     />
                   </div>
                 </div>
-                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-3">
+                <div class="bg-surface rounded-[var(--radius-lg)] border border-gray-200 p-3">
                   <p class="mb-2 text-[13px] font-bold text-gray-900">جدول اليوم</p>
                   <div class="space-y-2">
                     <div
@@ -119,13 +111,13 @@ const TONE: Record<string, string> = {
                 </div>
               </div>
               <div class="space-y-3">
-                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-3">
+                <div class="bg-surface rounded-[var(--radius-lg)] border border-gray-200 p-3">
                   <p class="mb-2 text-[13px] font-bold text-gray-900">التالي</p>
                   <div class="space-y-1.5">
                     <div v-for="n in 3" :key="n" class="h-7 rounded bg-gray-100" />
                   </div>
                 </div>
-                <div class="rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-3">
+                <div class="bg-surface rounded-[var(--radius-lg)] border border-gray-200 p-3">
                   <p class="mb-2 text-[13px] font-bold text-gray-900">نبض اليوم</p>
                   <div class="mb-2 h-2 overflow-hidden rounded-full bg-gray-100">
                     <div class="bg-primary-500 h-full w-[63%] rounded-full" />
@@ -138,7 +130,7 @@ const TONE: Record<string, string> = {
             <!-- CALENDAR -->
             <div
               v-else-if="active === 'calendar'"
-              class="rounded-[var(--radius-lg)] border border-gray-200 bg-surface p-4"
+              class="bg-surface rounded-[var(--radius-lg)] border border-gray-200 p-4"
             >
               <div class="mb-3 flex items-center justify-between">
                 <p class="text-[13px] font-bold text-gray-900">الأحد ٩ أغسطس</p>
@@ -178,13 +170,13 @@ const TONE: Record<string, string> = {
                 <span
                   v-for="l in ['اليوم', 'بانتظار التأكيد', 'غير مدفوع', 'يحتاج إجراء']"
                   :key="l"
-                  class="rounded-full border border-gray-200 bg-surface px-3 py-1 text-[11px] text-gray-500"
+                  class="bg-surface rounded-full border border-gray-200 px-3 py-1 text-[11px] text-gray-500"
                 >
                   {{ l }}
                 </span>
               </div>
               <div
-                class="divide-y divide-gray-200 rounded-[var(--radius-lg)] border border-gray-200 bg-surface"
+                class="bg-surface divide-y divide-gray-200 rounded-[var(--radius-lg)] border border-gray-200"
               >
                 <div v-for="r in ROWS" :key="r.name" class="flex items-center gap-3 px-3 py-2.5">
                   <span class="w-16 text-[11px] font-bold text-gray-900" data-numeric>١٠:٠٠ ص</span>
@@ -207,7 +199,7 @@ const TONE: Record<string, string> = {
             <!-- DETAIL -->
             <div
               v-else
-              class="mx-auto max-w-sm rounded-[var(--radius-lg)] border border-gray-200 bg-surface"
+              class="bg-surface mx-auto max-w-sm rounded-[var(--radius-lg)] border border-gray-200"
             >
               <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
                 <span class="text-[13px] font-bold text-gray-900" dir="ltr">BK-2026-0431</span>

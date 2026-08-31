@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { addDays, isSameDay, startOfDay, startOfWeek } from 'date-fns'
@@ -15,12 +15,10 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
 import DayTimeline from '@/components/booking/DayTimeline.vue'
 import WeekGrid from '@/components/booking/WeekGrid.vue'
 
-const emit = defineEmits<{ openBooking: [id: string] }>()
+const emit = defineEmits(['openBooking'])
 const store = useBookingsStore()
 const route = useRoute()
 const router = useRouter()
-
-type Mode = 'day' | 'week' | 'agenda'
 
 const MODES = [
   { value: 'day', label: 'يوم' },
@@ -28,7 +26,7 @@ const MODES = [
   { value: 'agenda', label: 'قائمة' },
 ]
 
-const mode = ref<Mode>((route.query.view as Mode) ?? 'day')
+const mode = ref(route.query.view ?? 'day')
 const cursor = ref(startOfDay(new Date()))
 
 // Kept in the URL so a particular view is linkable and survives a refresh.
@@ -48,7 +46,7 @@ const weekBookings = computed(() =>
 
 /** Agenda groups the next 14 days, skipping days with nothing on them. */
 const agenda = computed(() => {
-  const out: { date: Date; items: ReturnType<typeof store.onDay> }[] = []
+  const out = []
   for (let i = 0; i < 14; i++) {
     const d = addDays(startOfDay(new Date()), i)
     const items = store.onDay(d).filter((b) => b.status !== 'cancelled')
@@ -58,7 +56,7 @@ const agenda = computed(() => {
 })
 
 /** One arrow moves whatever unit is on screen. */
-function shift(direction: -1 | 1) {
+function shift(direction) {
   cursor.value = addDays(cursor.value, direction * (mode.value === 'week' ? 7 : 1))
 }
 
@@ -68,7 +66,7 @@ const heading = computed(() => {
   return `${relativeDay(weekStart.value)} — ${relativeDay(end)}`
 })
 
-function openDay(date: Date) {
+function openDay(date) {
   cursor.value = startOfDay(date)
   mode.value = 'day'
 }

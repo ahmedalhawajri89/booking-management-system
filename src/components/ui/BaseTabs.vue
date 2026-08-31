@@ -1,14 +1,5 @@
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue'
-import type { LucideIcon } from '@/types'
-
-export interface TabItem {
-  value: string
-  label: string
-  icon?: LucideIcon
-  /** Shown after the label — counts, mostly. */
-  badge?: string | number
-}
 
 /**
  * Roving-tabindex tablist: one stop in the tab order, arrows move between
@@ -17,30 +8,27 @@ export interface TabItem {
  * Arrow direction is swapped in RTL — ArrowLeft must move visually left, and
  * visually left is "next" when the strip runs right-to-left.
  */
-const props = withDefaults(
-  defineProps<{
-    modelValue: string
-    items: TabItem[]
-    variant?: 'segmented' | 'underline'
-    size?: 'sm' | 'md'
-    label: string
-  }>(),
-  { variant: 'segmented', size: 'md' },
-)
+const props = defineProps({
+  modelValue: { type: String, required: true },
+  items: { type: Array, required: true },
+  variant: { type: String, required: false, default: 'segmented' },
+  size: { type: String, required: false, default: 'md' },
+  label: { type: String, required: true },
+})
 
-const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+const emit = defineEmits(['update:modelValue'])
 
-const root = ref<HTMLElement | null>(null)
+const root = ref(null)
 
-function move(index: number, delta: number) {
+function move(index, delta) {
   const next = (index + delta + props.items.length) % props.items.length
   const item = props.items[next]
   if (!item) return
   emit('update:modelValue', item.value)
-  root.value?.querySelectorAll<HTMLElement>('[role="tab"]')[next]?.focus()
+  root.value?.querySelectorAll('[role="tab"]')[next]?.focus()
 }
 
-function onKey(e: KeyboardEvent, index: number) {
+function onKey(e, index) {
   const rtl = document.documentElement.dir === 'rtl'
   const forward = rtl ? 'ArrowLeft' : 'ArrowRight'
   const back = rtl ? 'ArrowRight' : 'ArrowLeft'
@@ -57,7 +45,7 @@ function onKey(e: KeyboardEvent, index: number) {
 const SIZE = {
   sm: 'h-8 px-3 text-[13px]',
   md: 'h-10 px-4 text-sm',
-} as const
+}
 </script>
 
 <template>

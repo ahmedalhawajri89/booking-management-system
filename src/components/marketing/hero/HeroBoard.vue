@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { CheckCircle2, Clock, TriangleAlert } from 'lucide-vue-next'
 import { heroChannels, heroConflict, heroDay } from '@/data/demo'
@@ -15,14 +15,11 @@ import { heroChannels, heroConflict, heroDay } from '@/data/demo'
  * same proportional timeline, same now-line — because a hero that invents its
  * own visual language is selling a screen that does not exist.
  */
-const props = defineProps<{
-  /** 0-based scene index. */
-  scene: number
-  /** 0–1 within the current scene. */
-  t: number
-  /** Reduced-motion callers render every state at rest. */
-  still?: boolean
-}>()
+const props = defineProps({
+  scene: { type: Number, required: true },
+  t: { type: Number, required: true },
+  still: { type: Boolean, required: false },
+})
 
 const { openMin, closeMin, blocks } = heroDay
 // Tuned so a 9-to-6 day fills a 100dvh stage without the board floating in
@@ -37,23 +34,23 @@ const TONE = {
   success: 'border-success-700/25 bg-success-50 text-success-700',
   info: 'border-info-700/25 bg-info-50 text-info-700',
   warning: 'border-warning-700/30 bg-warning-50 text-warning-700',
-} as const
+}
 
-const ICON = { success: CheckCircle2, info: Clock, warning: TriangleAlert } as const
+const ICON = { success: CheckCircle2, info: Clock, warning: TriangleAlert }
 
-function label(min: number): string {
+function label(min) {
   const h24 = Math.floor(min / 60)
   const h = h24 % 12 === 0 ? 12 : h24 % 12
   return `${h}:${String(min % 60).padStart(2, '0')} ${h24 < 12 ? 'ص' : 'م'}`
 }
 
-const top = (min: number) => (min - openMin) * PX_PER_MIN + 12
+const top = (min) => (min - openMin) * PX_PER_MIN + 12
 
 /* --- scene 1: the day fills in ---------------------------------------- */
 // Each block claims a slice of the scene, so they land one after another
 // rather than all at once. `>=` matters: at t=0 the first block is already
 // there, so the board never paints empty on arrival.
-function blockShown(i: number): boolean {
+function blockShown(i) {
   if (props.still || props.scene > 0) return true
   return props.t * blocks.length >= i * 0.8
 }
@@ -64,7 +61,7 @@ function blockShown(i: number): boolean {
 const COLLIDE_AT = 0.42
 const RESOLVE_AT = 0.68
 
-const conflictPhase = computed<'idle' | 'travel' | 'clash' | 'resolved'>(() => {
+const conflictPhase = computed(() => {
   if (props.still) return 'resolved'
   if (props.scene < 1) return 'idle'
   if (props.scene > 1) return 'resolved'
@@ -87,7 +84,7 @@ const ghostMin = computed(() => {
 
 /** The 10:20 booking is the one being landed on. */
 const clashingIndex = 1
-const isClashing = (i: number) => i === clashingIndex && conflictPhase.value === 'clash'
+const isClashing = (i) => i === clashingIndex && conflictPhase.value === 'clash'
 
 /* --- scene 3: every channel, one calendar ----------------------------- */
 const channelsIn = computed(() => {
@@ -119,7 +116,7 @@ const boardStyle = computed(() => {
 
 /* --- live now-line ---------------------------------------------------- */
 const nowMin = ref(0)
-let timer: number | undefined
+let timer
 function syncNow() {
   const d = new Date()
   const real = d.getHours() * 60 + d.getMinutes()

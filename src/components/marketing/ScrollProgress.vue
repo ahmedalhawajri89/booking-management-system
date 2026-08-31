@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 /** Reading position for a long page. rAF-throttled, passive, RTL-aware. */

@@ -1,6 +1,6 @@
-<script setup lang="ts">
+<script setup>
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Chart, type ChartConfiguration } from 'chart.js'
+import { Chart } from 'chart.js'
 import { setupCharts } from '@/composables/useChartTheme'
 
 /**
@@ -14,10 +14,14 @@ import { setupCharts } from '@/composables/useChartTheme'
  * A canvas is invisible to assistive tech, so `summary` is required — it is
  * the chart's actual accessible content, not decoration.
  */
-const props = defineProps<{ config: ChartConfiguration; summary: string; height?: number }>()
+const props = defineProps({
+  config: { type: Object, required: true },
+  summary: { type: String, required: true },
+  height: { type: Number, required: false },
+})
 
-const el = ref<HTMLCanvasElement | null>(null)
-let chart: Chart | null = null
+const el = ref(null)
+let chart = null
 
 function build() {
   if (!el.value) return

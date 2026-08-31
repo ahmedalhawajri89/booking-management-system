@@ -1,28 +1,23 @@
-<script setup lang="ts">
-import type { LucideIcon } from '@/types'
-
+<script setup>
 /**
  * One figure with its label. No sparkline and no delta-versus-last-period
  * arrow: with a range picker right above it, "up 12%" is ambiguous about
  * what it is up against, and a fake trend line is worse than none.
  */
-withDefaults(
-  defineProps<{
-    label: string
-    value: string
-    hint?: string
-    icon: LucideIcon
-    tone?: 'neutral' | 'success' | 'warning' | 'danger'
-  }>(),
-  { tone: 'neutral' },
-)
+defineProps({
+  label: { type: String, required: true },
+  value: { type: String, required: true },
+  hint: { type: String, required: false },
+  icon: { type: null, required: true },
+  tone: { type: String, required: false, default: 'neutral' },
+})
 
 const TONE = {
   neutral: 'bg-primary-50 text-primary-600',
   success: 'bg-success-50 text-success-700',
   warning: 'bg-warning-50 text-warning-700',
   danger: 'bg-danger-50 text-danger-700',
-} as const
+}
 </script>
 
 <template>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 
 /**
@@ -9,11 +9,11 @@ import { computed } from 'vue'
  * selects — none of which a canvas does. Chart.js has no heatmap type
  * anyway; the usual workaround is a scatter with square points.
  */
-const props = defineProps<{
-  cells: { weekday: number; hour: number; count: number }[]
-  fromHour: number
-  toHour: number
-}>()
+const props = defineProps({
+  cells: { type: Array, required: true },
+  fromHour: { type: Number, required: true },
+  toHour: { type: Number, required: true },
+})
 
 // Sunday first: the working week starts on Sunday in the region this is for.
 const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
@@ -23,18 +23,18 @@ const hours = computed(() =>
   Array.from({ length: props.toHour - props.fromHour + 1 }, (_, i) => props.fromHour + i),
 )
 
-function at(weekday: number, hour: number): number {
+function at(weekday, hour) {
   return props.cells.find((c) => c.weekday === weekday && c.hour === hour)?.count ?? 0
 }
 
 /** Opacity rather than a colour ramp: one hue keeps it honest about being a
  *  single measure, and it stays legible against the surface underneath. */
-function shade(count: number): string {
+function shade(count) {
   if (count === 0) return 'transparent'
   return `color-mix(in oklab, var(--color-primary-600) ${15 + (count / max.value) * 85}%, transparent)`
 }
 
-function hourLabel(h: number): string {
+function hourLabel(h) {
   const suffix = h < 12 ? 'ص' : 'م'
   const h12 = h % 12 === 0 ? 12 : h % 12
   return `${h12}${suffix}`
@@ -63,7 +63,10 @@ function hourLabel(h: number): string {
       </thead>
       <tbody>
         <tr v-for="(day, wd) in DAYS" :key="day">
-          <th scope="row" class="text-fg-subtle pe-2 text-end text-[11px] font-medium whitespace-nowrap">
+          <th
+            scope="row"
+            class="text-fg-subtle pe-2 text-end text-[11px] font-medium whitespace-nowrap"
+          >
             {{ day }}
           </th>
           <td

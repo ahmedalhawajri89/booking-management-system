@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Quote } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -78,7 +78,9 @@ const SUPPORTING = [
               <blockquote class="text-fg-muted text-[15px] leading-relaxed">
                 {{ c.quote }}
               </blockquote>
-              <figcaption class="border-border mt-4 flex items-center justify-between border-t pt-4">
+              <figcaption
+                class="border-border mt-4 flex items-center justify-between border-t pt-4"
+              >
                 <span>
                   <span class="text-fg block text-sm font-bold">{{ c.sector }}</span>
                   <span class="text-fg-subtle block text-[12px]">{{ c.size }}</span>

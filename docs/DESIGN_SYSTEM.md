@@ -346,7 +346,7 @@ Arabic display type needs `pb-[0.14em]` inside any clipping container — descen
 
 ### 14.3 Motion: scroll reveal
 
-`v-reveal` — a directive, not a library (`src/directives/reveal.ts`).
+`v-reveal` — a directive, not a library (`src/directives/reveal.js`).
 
 | Usage | Effect |
 |---|---|

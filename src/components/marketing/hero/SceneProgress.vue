@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 /**
  * Scene indicator and manual control.
  *
@@ -7,8 +7,12 @@
  * two. Here the viewer's own scroll is the transport — these dots report
  * where they are and let them jump, they never move on their own.
  */
-defineProps<{ titles: string[]; index: number; progress: number }>()
-defineEmits<{ select: [i: number] }>()
+defineProps({
+  titles: { type: Array, required: true },
+  index: { type: Number, required: true },
+  progress: { type: Number, required: true },
+})
+defineEmits(['select'])
 </script>
 
 <template>
@@ -32,9 +36,7 @@ defineEmits<{ select: [i: number] }>()
         <span
           class="block h-1.5 rounded-full transition-all duration-300"
           :class="
-            i === index
-              ? 'bg-primary-600 w-8'
-              : 'bg-border group-hover:bg-border-strong w-1.5'
+            i === index ? 'bg-primary-600 w-8' : 'bg-border group-hover:bg-border-strong w-1.5'
           "
         />
       </button>

@@ -1,7 +1,6 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 import { differenceInMinutes, isSameDay, set, startOfDay } from 'date-fns'
-import type { Booking } from '@/types'
 import { useBookingsStore } from '@/stores/bookings'
 import { businessHours } from '@/data/catalog'
 import { hoursFor } from '@/lib/availability'
@@ -13,8 +12,11 @@ import { BOOKING_STATUS } from '@/lib/status'
  * literal empty space, which is what "availability" actually means to an
  * operator glancing at the screen.
  */
-const props = defineProps<{ date: Date; bookings: Booking[] }>()
-defineEmits<{ open: [id: string] }>()
+const props = defineProps({
+  date: { type: Date, required: true },
+  bookings: { type: Array, required: true },
+})
+defineEmits(['open'])
 
 const store = useBookingsStore()
 const PX_PER_MIN = 1.4
@@ -34,7 +36,7 @@ const bounds = computed(() => {
 const ticks = computed(() => {
   const b = bounds.value
   if (!b) return []
-  const out: { label: string; top: number }[] = []
+  const out = []
   for (let m = 0; m <= b.totalMin; m += 60) {
     out.push({ label: time(new Date(b.open.getTime() + m * 60000)), top: m * PX_PER_MIN })
   }
@@ -64,7 +66,7 @@ const nowTop = computed(() => {
   return mins * PX_PER_MIN
 })
 
-const TONE: Record<string, string> = {
+const TONE = {
   success: 'border-success-700/30 bg-success-50 text-success-700',
   warning: 'border-warning-700/30 bg-warning-50 text-warning-700',
   danger: 'border-danger-700/30 bg-danger-50 text-danger-700',

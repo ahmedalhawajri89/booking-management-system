@@ -78,7 +78,7 @@ exclude using gist (resource_id with =, span with &&)
 ```
 
 `span` is a generated `tstzrange` using `'[)'`, the same half-open comparison
-`overlaps()` makes in `src/lib/availability.ts`, and the `WHERE` mirrors its
+`overlaps()` makes in `src/lib/availability.js`, and the `WHERE` mirrors its
 `BLOCKING` set — so the two definitions of "overlap" cannot drift apart. A
 violation surfaces as SQLSTATE `23P01`, which the repository turns into a
 typed `ConflictError`.

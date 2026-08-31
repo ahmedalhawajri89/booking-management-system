@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+﻿<script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { startOfDay } from 'date-fns'
 import { ArrowLeft, ArrowRight, Check, Copy, Phone, User } from 'lucide-vue-next'
@@ -27,15 +27,15 @@ const settings = useSettingsStore()
 const DRAFT_KEY = 'bookingpro:draft:v1'
 
 const step = ref(1)
-const serviceId = ref<string | null>(null)
+const serviceId = ref(null)
 const date = ref(startOfDay(new Date()))
-const startAt = ref<string | null>(null)
+const startAt = ref(null)
 const name = ref('')
 const phone = ref('')
 const notes = ref('')
 const touched = ref(false)
 const submitting = ref(false)
-const reference = ref<string | null>(null)
+const reference = ref(null)
 
 const service = computed(() => services.find((s) => s.id === serviceId.value) ?? null)
 
@@ -168,7 +168,7 @@ const STEPS = ['الخدمة', 'الموعد', 'بياناتك']
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <header class="sticky top-0 z-20 border-b border-gray-200 bg-surface/95 backdrop-blur">
+    <header class="bg-surface/95 sticky top-0 z-20 border-b border-gray-200 backdrop-blur">
       <div class="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
         <AppLogo compact />
         <RouterLink to="/" class="text-sm font-semibold text-gray-500 hover:text-gray-900">

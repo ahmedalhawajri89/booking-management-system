@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import {
   BellRing,
   ClipboardList,
@@ -11,26 +11,8 @@ import {
 } from 'lucide-vue-next'
 import SectionHeading from './SectionHeading.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
-import type { LucideIcon } from '@/types'
 
-/**
- * Bento grid: the two capabilities that actually differentiate the product
- * get a full-width row each, the rest are compact thirds. Uneven cell sizes
- * are the point — six equal cards is the shape this page was already stuck
- * in everywhere else.
- *
- * Every item describes something the app really does.
- *
- * GitBranch, not CalendarDays: the calendar icon was carrying three different
- * meanings across three sections, so it had stopped meaning anything.
- */
-interface Item {
-  icon: LucideIcon
-  title: string
-  body: string
-}
-
-const LEAD: Item[] = [
+const LEAD = [
   {
     icon: GitBranch,
     title: 'محرك توافر حقيقي',
@@ -43,7 +25,7 @@ const LEAD: Item[] = [
   },
 ]
 
-const REST: Item[] = [
+const REST = [
   {
     icon: Users,
     title: 'ملف العميل',
