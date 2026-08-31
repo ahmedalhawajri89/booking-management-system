@@ -1,23 +1,28 @@
 #!/usr/bin/env node
 /**
- * Fails if a service-role key could reach the browser.
+ * Fails if a backend secret could reach the browser.
  *
- * Everything Vite compiles from src/ is public, and the service role key
- * bypasses Row Level Security entirely — one careless import turns every
- * policy in supabase/migrations/0005 into decoration. This is cheap to run
- * and catches the mistake before it ships, which is the only time it is
- * cheap to catch.
+ * Everything Vite compiles from src/ is public. The API's own credentials —
+ * APP_KEY, the database password, mail and queue secrets — live in api/.env
+ * and must never cross into the bundle; one careless `VITE_` prefix turns a
+ * private key into a published one. This is cheap to run and catches the
+ * mistake before it ships, which is the only time it is cheap to catch.
+ *
+ * src/ and scripts/ are scanned. api/ is not: it is server code, where these
+ * values are supposed to be.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOTS = ['src', 'scripts']
 const PATTERNS = [
-  { re: /service_role/i, why: 'service role key or role name' },
-  { re: /VITE_[A-Z_]*SERVICE_ROLE/i, why: 'service role exposed through a VITE_ variable' },
-  // A Supabase JWT; the anon key is one too, so this only fires on literals
-  // rather than on a reference to an env var.
-  { re: /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\./, why: 'hard-coded JWT' },
+  { re: /VITE_[A-Z_]*(SECRET|PASSWORD|APP_KEY|PRIVATE|TOKEN_SECRET)/i, why: 'backend secret exposed through a VITE_ variable' },
+  { re: /\bDB_PASSWORD\b/, why: 'database password' },
+  { re: /\bAPP_KEY\b/, why: 'Laravel application key' },
+  // base64:... is the shape APP_KEY takes in a Laravel .env.
+  { re: /base64:[A-Za-z0-9+/]{40,}={0,2}/, why: 'hard-coded application key' },
+  // A JWT literal, rather than a reference to an env var.
+  { re: /eyJhbGciOi[A-Za-z0-9_-]+\./, why: 'hard-coded JWT' },
 ]
 
 const offences = []
@@ -29,14 +34,14 @@ function walk(dir) {
       walk(path)
       continue
     }
-    if (!/\.(ts|tsx|js|mjs|vue|json)$/.test(entry)) continue
+    if (!/\.(js|mjs|vue|json)$/.test(entry)) continue
     // This file necessarily contains the patterns it looks for.
     if (path.endsWith('check-secrets.mjs')) continue
 
     const text = readFileSync(path, 'utf8')
     text.split('\n').forEach((line, i) => {
       // Comments are skipped, and that is a deliberate trade: the code should
-      // be free to explain why this key is dangerous without tripping the
+      // be free to explain why a value is dangerous without tripping the
       // check that enforces it. Comments are also stripped from the
       // production bundle, so the exposure this guards against is in code.
       if (/^\s*(\/\/|\/?\*|#)/.test(line)) return
@@ -59,8 +64,8 @@ for (const root of ROOTS) {
 if (offences.length > 0) {
   console.error('✗ secrets check failed\n')
   for (const o of offences) console.error(`  ${o.path}:${o.line} — ${o.why}`)
-  console.error('\nThe service role key belongs in Edge Function secrets, never in src/.')
+  console.error('\nBackend secrets belong in api/.env, never in src/.')
   process.exit(1)
 }
 
-console.log('✓ no service-role credentials in shipped code')
+console.log('✓ no backend credentials in shipped code')

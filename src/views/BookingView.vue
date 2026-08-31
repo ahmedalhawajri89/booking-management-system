@@ -12,6 +12,7 @@ import { useBookingsStore } from '@/stores/bookings'
 import { useCustomersStore } from '@/stores/customers'
 import { useSettingsStore } from '@/stores/settings'
 import { businessHours, services } from '@/data/catalog'
+import { isDemoBackend } from '@/data/repository'
 import { generateSlots } from '@/lib/availability'
 import { duration, fullDate, money, time } from '@/lib/format'
 
@@ -129,25 +130,57 @@ function goBack() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+/**
+ * Two paths, because a guest is not an operator.
+ *
+ * On the demo backend everything is local, so the store writes the booking
+ * directly. Against the API it cannot: creating a booking there means writing
+ * the customer and the booking together, and an anonymous visitor has no
+ * business doing either through the operator endpoints. The public endpoint
+ * exists for exactly this, and computes the price, the end time and the
+ * reference itself — the four facts below are all the caller is trusted for.
+ */
 async function submit() {
   touched.value = true
   if (!canContinue.value || !serviceId.value || !resourceId.value || !startAt.value) return
   submitting.value = true
   try {
-    const customer = customers.upsert({ name: name.value, phone: phone.value })
-    const created = bookings.create({
-      customerId: customer.id,
-      serviceId: serviceId.value,
-      resourceId: resourceId.value,
-      startAt: startAt.value,
-      status: 'pending',
-      paymentStatus: 'unpaid',
-      channel: 'online',
-      notes: notes.value.trim() || undefined,
-    })
-    reference.value = created.reference
+    if (isDemoBackend) {
+      const customer = customers.upsert({ name: name.value, phone: phone.value })
+      const created = bookings.create({
+        customerId: customer.id,
+        serviceId: serviceId.value,
+        resourceId: resourceId.value,
+        startAt: startAt.value,
+        status: 'pending',
+        paymentStatus: 'unpaid',
+        channel: 'online',
+        notes: notes.value.trim() || undefined,
+      })
+      reference.value = created.reference
+    } else {
+      const { bookPublic } = await import('@/data/api/public')
+      const created = await bookPublic({
+        serviceId: serviceId.value,
+        resourceId: resourceId.value,
+        startAt: startAt.value,
+        name: name.value.trim(),
+        phone: phone.value.trim(),
+        notes: notes.value.trim() || undefined,
+      })
+      reference.value = created.reference
+    }
     localStorage.removeItem(DRAFT_KEY)
     step.value = 4
+  } catch (e) {
+    // The slot went while the wizard was open, or the server refused the
+    // time. Either way the booking did not happen and saying so beats
+    // advancing to a confirmation screen with no booking behind it.
+    toast.error(
+      e?.status === 409
+        ? 'هذا الوقت لم يعد متاحاً — اختر وقتاً آخر'
+        : 'تعذّر إتمام الحجز. حاول مرة أخرى.',
+    )
   } finally {
     submitting.value = false
   }

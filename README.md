@@ -27,6 +27,8 @@ Most booking demos store a time as text and let you double-book. This one does n
 
 **Conflicts are detected with half-open interval overlap** — `aStart < bEnd && bStart < aEnd` — so an appointment ending at 10:00 and one starting at 10:00 do not collide, while any real overlap does. Only pending and confirmed bookings block; cancelled ones free their slot immediately.
 
+**And the rule is enforced where it counts.** The slot grid never offers a taken time and the store checks before it writes, but neither can stop two operators confirming the same slot in the same second. The API locks the resource row before it tests for an overlap, inside the transaction that writes the booking — so the second one loses. `api/tests/Feature/ConcurrentBookingTest.php` proves it with two live connections rather than asserting it in a comment.
+
 **The domain model is machine-readable.** Times are ISO 8601 instants, money is stored in minor units, and statuses are machine values rendered through one label map. That is what makes the calendar, the filters and the totals possible at all.
 
 ---
@@ -48,11 +50,15 @@ Most booking demos store a time as text and let you double-book. This one does n
 
 ## Tech stack
 
-**Vue 3.5** with `<script setup>` · **JavaScript** (ES modules, JSDoc types) · **Vite 6** · **Tailwind CSS 4** (`@theme` tokens) · **Pinia** · **Vue Router 4** with route guards · **date-fns** with the Arabic locale · **Chart.js** via **vue-chartjs** · **lucide-vue-next** · **vue-sonner** · **Vitest** for the unit suite · **Playwright** for the end-to-end run.
+**Front end** — Vue 3.5 with `<script setup>` · JavaScript (ES modules, JSDoc types) · Vite 6 · Tailwind CSS 4 (`@theme` tokens) · Pinia · Vue Router 4 with route guards · date-fns with the Arabic locale · Chart.js via vue-chartjs · lucide-vue-next · vue-sonner
+
+**Back end** — Laravel 12 · PHP 8.2 · MySQL · Sanctum for token auth
+
+**Testing** — Vitest for the slot engine and the exports · PHPUnit against a real MySQL database · Playwright for the end-to-end run.
 
 The domain model is documented as JSDoc `@typedef`s in `src/types/index.js`. Editors read them through `jsconfig.json`, so a wrong property name still gets flagged while writing — without a compile step in the build.
 
-Data lives behind a repository interface, currently backed by `localStorage`. Swapping in a real HTTP API means replacing one file — nothing above it changes.
+Data lives behind a repository interface with two implementations: `localStorage`, and the Laravel API in `api/`. One environment variable picks between them and nothing above the seam changes — which is also what keeps the live demo working, since Vercel serves a static bundle and cannot host PHP or MySQL.
 
 ---
 
@@ -73,6 +79,21 @@ npm run format       # Prettier with the Tailwind class sorter
 
 No backend or database is required. Seed data regenerates for the current day on first load, so the schedule is never empty.
 
+### With the real backend
+
+```bash
+cd api
+cp .env.example .env && php artisan key:generate
+mysql -u root -e "create database booking_management character set utf8mb4"
+php artisan migrate --seed
+php artisan serve --port=8000
+```
+
+Then `echo "VITE_API_URL=http://localhost:8000/api" > .env.local` and
+`npm run dev`. The seeder creates an operator — `operator@example.com` /
+`password`. See [docs/BACKEND.md](docs/BACKEND.md) for what moved, and what
+was lost, when the schema left Postgres.
+
 ---
 
 ## Project structure
@@ -81,7 +102,8 @@ No backend or database is required. Seed data regenerates for the current day on
 src/
   types/index.js            domain model as JSDoc typedefs — the source of truth
   lib/availability.js       slot generation, overlap and occupancy
-  data/repository.js        persistence seam (localStorage today, HTTP later)
+  data/repository.js        persistence seam — localStorage or the API
+  data/api/                 the Laravel-backed implementation
   data/seed.js              realistic seed data, re-dated daily
   stores/bookings.js        Pinia store: queries, mutations, undo
   views/                    public pages and the /app operator console
@@ -95,6 +117,11 @@ docs/
   DESIGN_SYSTEM.md          tokens, elevation, status colour rules
   IMPLEMENTATION_PLAN.md
 scripts/qa.mjs              end-to-end walkthrough across 3 viewports
+api/
+  routes/api.php            the whole API surface, on one screen
+  app/Services/             BookingWriter — the no-double-booking transaction
+  database/migrations/      the MySQL schema
+  tests/Feature/            47 tests, run against MySQL rather than sqlite
 ```
 
 ---
@@ -120,7 +147,7 @@ Licensed under the MIT License.
 
 الأوقات مخزّنة بصيغة ISO 8601 والمبالغ بالوحدات الصغرى والحالات بقيم برمجية — وهذا ما يجعل التقويم والفلاتر والمجاميع ممكنة أصلاً.
 
-**التقنيات:** Vue 3 و JavaScript و Tailwind CSS 4 و Pinia و Vite، مع اختبارات Vitest و Playwright. طبقة البيانات معزولة خلف واجهة واحدة، فاستبدال التخزين المحلي بـ API حقيقي يتطلب تعديل ملف واحد فقط.
+**التقنيات:** Vue 3 و JavaScript و Tailwind CSS 4 و Pinia و Vite في الواجهة، و Laravel 12 و PHP 8.2 و MySQL في الخلفية، مع اختبارات Vitest و PHPUnit و Playwright. طبقة البيانات معزولة خلف واجهة واحدة، فالتبديل بين التخزين المحلي و API حقيقي متغيّر بيئة واحد.
 
 المشروع مرفق بتوثيق مكتوب: تدقيق تجربة المستخدم، معمارية المعلومات، ونظام التصميم.
 

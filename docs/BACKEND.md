@@ -3,139 +3,169 @@
 The app runs against one of two backends, chosen by a single environment
 variable.
 
-| | `VITE_SUPABASE_URL` unset | set |
+| | `VITE_API_URL` unset | set |
 |---|---|---|
-| Storage | `localStorage` | Postgres via Supabase |
-| Auth | a session that verifies nothing | Supabase Auth |
-| Seed data | regenerated each day, anchored to today | `supabase/seed.sql`, run once |
+| Storage | `localStorage` | MySQL, through the Laravel API in `api/` |
+| Auth | a session that verifies nothing | Laravel Sanctum bearer tokens |
+| Seed data | regenerated each day, anchored to today | `php artisan db:seed`, run once |
 | Reset button in Settings | shown | hidden |
 
 The demo path exists so the app is usable with no setup at all, and so
 development works offline. It is not a stub: it enforces the same
-no-double-booking rule the database does, because two backends that disagree
-about what is legal produce bugs that only appear in production.
+no-double-booking rule the API does, because two backends that disagree about
+what is legal produce bugs that only appear in production.
+
+It is also what keeps the public demo alive. The deployed site is a static
+bundle on Vercel, which cannot host PHP or MySQL, so it runs the localStorage
+path and is a complete working product rather than a broken shell.
 
 ---
 
-## Running against Supabase
+## Running against MySQL
 
 ```bash
-cp .env.example .env.local     # fill in URL, anon key, org id
-supabase db push               # or run supabase/migrations/*.sql in order
-psql "$SUPABASE_DB_URL" -f supabase/seed.sql
+cd api
+cp .env.example .env
+php artisan key:generate
+mysql -u root -e "create database booking_management character set utf8mb4 collate utf8mb4_unicode_ci"
+php artisan migrate --seed
+php artisan serve --port=8000
+```
+
+Then, from the project root:
+
+```bash
+echo "VITE_API_URL=http://localhost:8000/api" > .env.local
 npm run dev
 ```
 
-Then grant yourself operator access. The role lives in `app_metadata`, which
-only the service role can write — that is the point. From the SQL editor:
+The seeder creates one operator — `operator@example.com` / `password` — along
+with the catalog and a fortnight of bookings that includes the awkward cases
+the operator console exists to surface.
 
-```sql
-update auth.users
-set raw_app_meta_data = raw_app_meta_data
-  || jsonb_build_object(
-       'role', 'operator',
-       'org_id', '00000000-0000-4000-8000-000000000001'
-     )
-where email = 'you@example.com';
+### Granting operator access
+
+`role` is not in the `User` model's `$fillable`, so no request body can set it.
+That is deliberate and it is the whole access-control story: an account is a
+customer unless a migration, a seeder, or someone at a console says otherwise.
+
+```bash
+php artisan tinker --execute="\App\Models\User::where('email','you@example.com')->update(['role'=>'operator'])"
 ```
 
-Sign out and in again to pick up the new claim.
-
-### Why not `user_metadata`
-
-Because the user can write it. A role stored there is a role anyone can grant
-themselves, and every policy in `0005_rls.sql` keys off
-`auth.jwt() -> 'app_metadata' ->> 'role'`.
+The next request picks it up. Nothing about the role travels in the token —
+`/auth/me` re-reads the row — so revoking access takes effect immediately
+rather than whenever the client next signs in.
 
 ---
 
-## Environment variables
+## No double-booking
 
-| Variable | Where | Public? |
-|---|---|---|
-| `VITE_SUPABASE_URL` | `.env.local`, CI | Yes — it is a URL |
-| `VITE_SUPABASE_ANON_KEY` | `.env.local`, CI | **Yes, by design.** RLS is the guard |
-| `VITE_SUPABASE_ORG_ID` | `.env.local`, CI | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Edge Function secrets only | **Never** |
+This is the rule the whole project exists to make true, and it is the part of
+the backend that changed most when it moved off Postgres.
 
-Anything prefixed `VITE_` is compiled into the bundle and served to every
-visitor. The service role key bypasses RLS entirely; shipping it would make
-every policy decoration. `npm run check:secrets` fails the build if it, or a
-hard-coded JWT, appears under `src/` or `scripts/`.
-
----
-
-## What the database guarantees
-
-The client checks for conflicts before writing and the slot grid never offers
-a taken time. Both are good, and neither is a guarantee — they cannot stop two
-operators confirming the same slot in the same second, and they cannot stop a
-direct write. This can:
+Postgres could state it declaratively:
 
 ```sql
 exclude using gist (resource_id with =, span with &&)
-  where (status in ('pending','confirmed'))
+where (status in ('pending', 'confirmed'))
 ```
 
-`span` is a generated `tstzrange` using `'[)'`, the same half-open comparison
-`overlaps()` makes in `src/lib/availability.js`, and the `WHERE` mirrors its
-`BLOCKING` set — so the two definitions of "overlap" cannot drift apart. A
-violation surfaces as SQLSTATE `23P01`, which the repository turns into a
-typed `ConflictError`.
+That constraint held against everything — the application, a migration, a
+person with `psql` open. MySQL has no exclusion constraint and no range type,
+so it has no translation. A unique index on `(resource_id, start_at)` would be
+worse than nothing: it forbids two bookings starting at the same instant while
+happily allowing 10:00–10:40 to sit on top of 10:20–11:00, which is the
+overlap anyone actually hits.
 
-Also enforced in the database, not just the UI:
+So the rule moved into `app/Services/BookingWriter.php`, which:
 
-- **Audit trail.** `booking_events` rows are written by a trigger, and no
-  policy allows a client to insert one. An audit trail a caller can append to
-  is not an audit trail.
-- **Opening hours.** `is_within_business_hours()` evaluates in the
-  organization's own timezone, so "10:00" means 10:00 to the operator.
-- **Customer identity.** `phone_digits` is a generated column with a unique
-  constraint, which puts `normalisePhone()` in the database and keeps dedupe
-  correct regardless of which client wrote the row.
+1. opens a transaction,
+2. takes `SELECT ... FOR UPDATE` on the **resource** row,
+3. tests for overlap with `aStart < bEnd && bStart < aEnd`, half-open so
+   touching edges do not collide,
+4. writes, or raises `BookingConflict` → HTTP 409 → `ConflictError` on the
+   client.
 
-## What guests can do without an account
+The lock is what makes step 3 sound. Without it, two operators confirming the
+same slot in the same second both read "free" before either writes. Locking
+the resource — the thing that can be double-booked — serialises writes for
+that room and lets bookings for other rooms proceed in parallel.
 
-Two `security definer` functions, not table policies:
-
-- **`book_public(...)`** — granting `anon` INSERT would let a caller choose
-  their own price, end time and status. Everything that matters is computed
-  from the service row instead.
-- **`get_booking_by_reference(ref, phone_last4)`** — `BK-2026-0431` is
-  sequential, so a policy keyed on the reference alone would expose every
-  booking to anyone who can count. Two factors required.
+**What this no longer guarantees.** Anything that writes through the
+application is safe. A client with database credentials writing raw SQL is
+not; the Postgres constraint would have refused that too, and this does not.
+That is the real cost of the move, and `tests/Feature/ConcurrentBookingTest.php`
+is what stops the remaining guarantee from quietly rotting: it asserts the
+lock is taken, that a committed write from a second connection is seen and
+refused, and that a held lock actually blocks a second session.
 
 ---
 
-## Testing
+## What replaced Row Level Security
+
+RLS failed closed. A query that forgot to scope itself still returned only
+permitted rows, so a mistake in application code could not become a leak.
+MySQL has nothing equivalent, so the checks moved to two places and both are
+code that can be wrong:
+
+- **`routes/api.php`** — the whole API surface on one screen. `EnsureOperator`
+  on the write group is the entire access control for those routes.
+- **The read controllers** — `ResolveOptionalUser` lets a request through
+  unauthenticated, and each controller then answers "what may this caller
+  see" the way a policy did: an operator sees the organization, a signed-in
+  customer sees their own rows, a guest sees none. A guest gets an empty list
+  rather than a 403, because that is what the policy did and because the
+  booking wizard calls `/bookings` before anyone has signed in.
+
+`tests/Feature/AccessControlTest.php` is the only thing standing where the
+database used to stand, which is why it asserts the negative cases directly:
+that a guest sees no customers, that a customer cannot reach the operator
+writes, that registering cannot grant a role, and that the login error is the
+same whether or not the address exists.
+
+---
+
+## Other translations
+
+| Postgres | MySQL |
+|---|---|
+| `citext` / `pg_trgm` name search | `FULLTEXT` index on `customers.name` |
+| `phone_digits` generated column | same, via `REGEXP_REPLACE(...) STORED` |
+| `create sequence booking_reference_seq` | `booking_reference_counters`, a row locked inside the booking transaction |
+| `emit_booking_event()` trigger | `BookingWriter::recordChanges()` |
+| `is_within_business_hours()` | `PublicBookingController::withinBusinessHours()` |
+| `book_public()` / `get_booking_by_reference()` / `cancel_by_reference()` | `POST/GET /api/public/bookings…` |
+| `tstzrange` + `&&` | `start_at < ? and end_at > ?`, the same half-open test |
+
+`CHECK` constraints survived unchanged — MariaDB 10.2+ and MySQL 8.0.16+
+enforce them, so `bookings_ordered`, the price and duration floors, and
+`business_hours_ordered` are all still the database's problem rather than the
+application's.
+
+---
+
+## Known gap: the guest wizard shows every slot as free
+
+A guest reads `/bookings` and gets an empty list, so `generateSlots()` has
+nothing to mark as taken and offers times that are already booked. The server
+refuses them with a 409 and the wizard says so, which is correct but late.
+
+This is inherited, not introduced: the same was true of the Postgres build,
+where `bookings_read` gave an anonymous caller no rows. Fixing it properly
+means a public endpoint that returns busy ranges — start and end only, no
+customer data — for a service and a date. That is a change to the booking
+flow rather than a translation of it, so it is not part of this port.
+
+---
+
+## Tests
 
 ```bash
-npm test          # pure logic: availability, analytics, CSV escaping
-npm run db:test   # migrations + seed + SQL tests, in Docker
+cd api && php artisan test     # 47 tests
 ```
 
-`db:test` starts a throwaway Postgres 16, applies every migration and the
-seed, and runs `supabase/tests/*.sql`: 23 assertions covering the exclusion
-constraint, the audit trigger, opening hours, and RLS evaluated as `anon`,
-a customer, a stranger, and an operator with real JWT claims.
-
-`supabase/tests/00_shim.sql` stands in for what Supabase itself provides — the
-`auth` schema, `auth.uid()`, and the `anon`/`authenticated` roles — so all of
-this runs against plain Postgres. It is never applied to a real project.
-
----
-
-## Known limitations
-
-- **`saveBookings` upserts the whole array.** That is fine for localStorage
-  and wasteful against Postgres. Granular writes are the next step; the
-  interface was kept identical for this pass so the backend swap could be
-  verified on its own.
-- **The public catalogue policies are not org-scoped**, and cannot be — an
-  anonymous visitor carries no org claim, so callers pass `org_id` as a
-  filter. On a single-tenant deployment that is equivalent. Serving several
-  businesses would need a public `slug` lookup or a security-definer function;
-  writes are already scoped.
-- **No realtime yet.** Two operators on the same screen will not see each
-  other's changes until reload. `subscribeBookings` on the repository
-  interface is the intended shape.
+They run against MySQL, not the usual sqlite `:memory:`. The schema is not
+portable and is not meant to be — the generated column, the fulltext index and
+the `CHECK` constraints are the things under test, and a suite on sqlite would
+pass while testing a different database than the one that ships.

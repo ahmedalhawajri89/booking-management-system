@@ -72,7 +72,7 @@ class LocalRepository {
 
   /**
    * Refuses to persist an overlap, so the demo backend enforces the same rule
-   * bookings_no_double_booking does in Postgres. Without this the two
+   * the API enforces inside its booking transaction. Without this the two
    * backends disagree about what is legal, and a bug would only ever show up
    * in production.
    */
@@ -124,30 +124,34 @@ class LocalRepository {
 /**
  * One environment variable decides the backend.
  *
- * With VITE_SUPABASE_URL set the app talks to Postgres; without it, to
- * localStorage. That keeps the demo working with no setup, lets development
- * carry on offline, and — the reason it is a flag rather than a rewrite —
- * makes rolling back a deployment a config change instead of a revert.
+ * With VITE_API_URL set the app talks to the Laravel API and MySQL; without
+ * it, to localStorage. That keeps the demo working with no setup, lets
+ * development carry on offline, and — the reason it is a flag rather than a
+ * rewrite — makes rolling back a deployment a config change instead of a
+ * revert.
+ *
+ * It is also what keeps the public demo alive: Vercel serves this bundle as
+ * static files and cannot host PHP or MySQL, so the deployed site runs the
+ * localStorage path and stays a complete, working product.
  */
-export const isDemoBackend = !import.meta.env.VITE_SUPABASE_URL
+export const isDemoBackend = !import.meta.env.VITE_API_URL
 
 let active = new LocalRepository()
 
 /**
- * Loads the Supabase implementation, and only then.
+ * Loads the API implementation, and only then.
  *
- * Importing it at the top of this file cost every visitor on the demo backend
- * the whole supabase-js client — it took the bookings chunk from 49KB to
- * 275KB for code that would never run. The dynamic import keeps it in its own
- * chunk that is fetched only when the app is actually configured for it.
+ * Kept as a dynamic import for the same reason it was one before: code that
+ * will never run on the demo backend should not be in the chunk that every
+ * visitor downloads.
  *
- * Called once from main.ts before mount, so no store ever sees a half-swapped
+ * Called once from main.js before mount, so no store ever sees a half-swapped
  * backend.
  */
 export async function initRepository() {
   if (isDemoBackend) return
-  const { SupabaseRepository } = await import('./supabase/repository')
-  active = new SupabaseRepository()
+  const { ApiRepository } = await import('./api/repository')
+  active = new ApiRepository()
 }
 
 /**

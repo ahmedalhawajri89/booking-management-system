@@ -38,9 +38,29 @@ const notes = ref('')
 const submitting = ref(false)
 const touched = ref(false)
 
-const service = computed(() => services.find((s) => s.id === serviceId.value))
+const service = computed(() => services.find((s) => s.id === serviceId.value) ?? services[0])
 const allowedResources = computed(() =>
-  resources.filter((r) => service.value.resourceIds.includes(r.id)),
+  resources.filter((r) => service.value?.resourceIds.includes(r.id)),
+)
+
+/**
+ * The catalog arrives after this component is set up.
+ *
+ * `serviceId` starts on the defaults in data/catalog.js, and the settings
+ * store then replaces those rows with whatever the repository returns. On the
+ * demo backend the ids happen to survive that swap; against a real one they
+ * do not, and the captured id stops matching anything — which used to leave
+ * `service` undefined and take the drawer down with it.
+ *
+ * Re-pointing the selection at a row that exists is what keeps the radio
+ * group and the slot grid agreeing about which service is selected.
+ */
+watch(
+  () => services.map((s) => s.id).join(),
+  () => {
+    if (!services.some((s) => s.id === serviceId.value)) serviceId.value = services[0]?.id
+  },
+  { immediate: true },
 )
 
 /** A phone that matches an existing customer pre-fills the name. */
@@ -76,7 +96,7 @@ watch(matched, (c) => {
 })
 
 watch(service, (s) => {
-  if (!s.resourceIds.includes(resourceId.value)) resourceId.value = s.resourceIds[0]
+  if (s && !s.resourceIds.includes(resourceId.value)) resourceId.value = s.resourceIds[0]
   startAt.value = null
 })
 watch([date, resourceId], () => {

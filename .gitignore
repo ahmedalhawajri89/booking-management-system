@@ -4,7 +4,6 @@ dist-ssr
 *.local
 .DS_Store
 coverage
-*.tsbuildinfo
 
 # Editor directories and files
 .vscode/*

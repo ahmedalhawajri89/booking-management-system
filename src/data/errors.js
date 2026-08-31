@@ -4,12 +4,12 @@
  */
 
 /**
- * The slot was taken. Raised when Postgres rejects a write with 23P01
- * (bookings_no_double_booking), or when the local backend's own conflict
+ * The slot was taken. Raised when the API refuses a write with 409 from
+ * inside the booking transaction, or when the local backend's own conflict
  * check refuses one.
  *
- * A typed error rather than a string match: the message is a Postgres
- * constraint name, and no screen should ever be parsing that.
+ * A typed error rather than a status code or a message match: no screen
+ * should be reading HTTP semantics to decide what to tell an operator.
  */
 export class ConflictError extends Error {
   constructor(message = 'هذا الوقت لم يعد متاحاً — اختر وقتاً آخر') {

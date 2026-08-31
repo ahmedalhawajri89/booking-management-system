@@ -26,7 +26,7 @@ app.use(router)
 app.directive('reveal', vReveal)
 
 // Resolve the backend before the first screen renders, so no store can start
-// reading from localStorage and then find itself talking to Postgres.
+// reading from localStorage and then find itself talking to the API.
 //
 // .then rather than top-level await: that would raise the build target above
 // the browsers this is compiled for, to save one line here.

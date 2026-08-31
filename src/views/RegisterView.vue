@@ -41,14 +41,15 @@ async function submit() {
       toast.success('تم إنشاء حسابك')
       await router.push('/book')
     } else {
-      // Supabase is configured to confirm addresses, so there is no session
-      // yet and saying "welcome" would be a lie.
-      toast.success('أرسلنا رابط تأكيد إلى بريدك')
+      // Registering does not issue a token: the server creates the account
+      // and nothing else, so there is no session yet and saying "welcome"
+      // would be a lie. Signing in is one deliberate step, not a surprise.
+      toast.success('تم إنشاء حسابك — سجّل الدخول للمتابعة')
       await router.push('/login')
     }
   } catch (e) {
     toast.error(
-      e instanceof Error && /already registered/i.test(e.message)
+      e instanceof Error && /already (registered|been taken)/i.test(e.message)
         ? 'هذا البريد مسجّل بالفعل'
         : 'تعذّر إنشاء الحساب. حاول مرة أخرى.',
     )

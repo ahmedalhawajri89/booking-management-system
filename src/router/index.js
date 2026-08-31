@@ -105,11 +105,12 @@ const router = createRouter({
 /**
  * Async because the session may not exist yet.
  *
- * Supabase restores a session from storage asynchronously. A synchronous
- * `isAuthenticated` check therefore runs *before* the answer is known, and a
- * hard load of /app bounces a signed-in operator straight to the login
- * screen — the single most common way this migration goes wrong. Awaiting
- * init() costs nothing on the demo backend, where it resolves immediately.
+ * Restoring a session means asking the server whether the stored token is
+ * still good. A synchronous `isAuthenticated` check therefore runs *before*
+ * the answer is known, and a hard load of /app bounces a signed-in operator
+ * straight to the login screen — the single most common way this migration
+ * goes wrong. Awaiting init() costs nothing on the demo backend, where it
+ * resolves immediately.
  */
 router.beforeEach(async (to) => {
   const auth = useAuthStore()

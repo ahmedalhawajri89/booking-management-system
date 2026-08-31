@@ -16,8 +16,8 @@ import {
  * services became editable and persisted, the icon had to stop being the
  * component itself.
  *
- * Also the seam the Supabase migration needs later: a `services.icon_key text`
- * column maps straight onto this.
+ * Also the seam the database needs: a `services.icon_key` column maps
+ * straight onto this.
  */
 export const SERVICE_ICONS = {
   HeartPulse,
