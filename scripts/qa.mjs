@@ -1,9 +1,16 @@
 import { chromium } from 'playwright'
 
-const BASE = 'http://localhost:5173'
+// The dev server's default, overridable — 5173 is a popular port and this
+// script silently walked a different project that happened to own it.
+const BASE = process.env.QA_BASE_URL || 'http://localhost:5173'
 const OUT = './qa-screenshots'
+// Playwright resolves its own browser. This used to hard-code a path inside
+// the container it was written in, which meant `npm run qa` could not run on
+// a developer's machine at all — a QA script that only works in one place is
+// a QA script nobody runs. PLAYWRIGHT_CHROMIUM overrides it where the browser
+// really does live somewhere else.
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium',
+  executablePath: process.env.PLAYWRIGHT_CHROMIUM || undefined,
   args: ['--no-sandbox'],
 })
 

@@ -1,0 +1,92 @@
+name: CI
+
+# The project claims a hundred tests and a rule that double-booking is
+# impossible. Neither claim is worth much if nothing runs them on a machine
+# that is not the author's.
+
+on:
+  push:
+    branches: [main, redesign]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Before the tests, not after: a leaked key that only fails the build at
+      # the end is a leaked key that someone pushes past in a hurry.
+      - name: No backend credentials in shipped code
+        run: npm run check:secrets
+
+      - run: npm test
+
+      - run: npm run build
+
+      - name: Formatting is unchanged
+        run: npx prettier --check "src/**/*.{vue,js,css}"
+
+  api:
+    name: API
+    runs-on: ubuntu-latest
+
+    # The suite runs against MySQL rather than sqlite on purpose — the
+    # generated column, the fulltext index and the CHECK constraints are among
+    # the things under test, and sqlite would pass while testing something else.
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: booking_management_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, mbstring, bcmath
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: api/vendor
+          key: composer-${{ hashFiles('api/composer.lock') }}
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare the environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Tests
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: booking_management_test
+          DB_USERNAME: root
+          DB_PASSWORD: ''
+        run: php artisan test
