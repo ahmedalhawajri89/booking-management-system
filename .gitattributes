@@ -1,0 +1,16 @@
+# Everything in this repo is LF in git, and now on disk too.
+#
+# Without this, core.autocrlf=true hands Windows a CRLF working tree while the
+# committed blobs stay LF — so `npx prettier --check` fails locally on all 91
+# source files and passes in CI, which is the worst way for a check to behave.
+* text=auto eol=lf
+
+# Binary: never touched.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.woff  binary
+*.woff2 binary
