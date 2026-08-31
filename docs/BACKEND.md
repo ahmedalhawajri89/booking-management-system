@@ -194,7 +194,7 @@ numbers exist.
 
 ```bash
 npm test                       # 47 — the slot engine, exports, and the local repository
-cd api && php artisan test     # 53 — schema, access control, concurrency, the guest paths
+cd api && php artisan test     # 60 — schema, access control, concurrency, catalog writes, guest paths
 ```
 
 They run against MySQL, not the usual sqlite `:memory:`. The schema is not

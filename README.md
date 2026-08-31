@@ -121,7 +121,7 @@ api/
   routes/api.php            the whole API surface, on one screen
   app/Services/             BookingWriter — the no-double-booking transaction
   database/migrations/      the MySQL schema
-  tests/Feature/            53 tests, run against MySQL rather than sqlite
+  tests/Feature/            60 tests, run against MySQL rather than sqlite
 ```
 
 ---

@@ -127,7 +127,11 @@ class CatalogController extends Controller
             }
 
             foreach ($data['businessHours'] ?? [] as $h) {
-                BusinessHour::updateOrCreate(
+                // The query builder, not Eloquent. business_hours is keyed on
+                // (org_id, weekday) with no surrogate id, and Eloquent builds
+                // its UPDATE from a single primary key — which is null here,
+                // so updateOrCreate() reported success and changed nothing.
+                DB::table('business_hours')->updateOrInsert(
                     ['org_id' => $org, 'weekday' => $h['weekday']],
                     ['open_time' => $h['open'], 'close_time' => $h['close'], 'is_closed' => $h['isClosed']]
                 );

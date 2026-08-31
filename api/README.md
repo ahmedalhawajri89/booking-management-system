@@ -38,7 +38,7 @@ The seeder creates one operator: `operator@example.com` / `password`.
 php artisan test
 ```
 
-53 tests against a real MySQL database rather than sqlite `:memory:`. That is
+60 tests against a real MySQL database rather than sqlite `:memory:`. That is
 deliberate: the `phone_digits` generated column, the fulltext index and the
 `CHECK` constraints are among the things under test, and a suite running on
 sqlite would pass while testing a different database than the one that ships.
