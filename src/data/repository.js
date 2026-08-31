@@ -71,21 +71,44 @@ class LocalRepository {
   }
 
   /**
-   * Refuses to persist an overlap, so the demo backend enforces the same rule
-   * the API enforces inside its booking transaction. Without this the two
-   * backends disagree about what is legal, and a bug would only ever show up
-   * in production.
+   * Every pair of blocking bookings that share a resource and overlap, as
+   * `id|id` keys. Half-open, matching overlaps() in src/lib/availability.js
+   * and the `start_at < ? and end_at > ?` test the API runs under its lock.
    */
-  async saveBookings(bookings) {
+  static #conflictPairs(bookings) {
     const blocking = bookings.filter((b) => b.status === 'pending' || b.status === 'confirmed')
+    const pairs = new Set()
     for (let i = 0; i < blocking.length; i++) {
       for (let j = i + 1; j < blocking.length; j++) {
         const a = blocking[i]
         const b = blocking[j]
         if (a.resourceId !== b.resourceId) continue
-        // Half-open, matching overlaps() and the tstzrange '[)' in the schema.
-        if (a.startAt < b.endAt && b.startAt < a.endAt) throw new ConflictError()
+        if (a.startAt < b.endAt && b.startAt < a.endAt) {
+          pairs.add([a.id, b.id].sort().join('|'))
+        }
       }
+    }
+    return pairs
+  }
+
+  /**
+   * Refuses to persist an overlap this write would *introduce*, so the demo
+   * backend enforces the same rule the API enforces inside its booking
+   * transaction. Without that the two backends disagree about what is legal,
+   * and a bug would only ever show up in production.
+   *
+   * "Introduce" is load-bearing, and used not to be. Rejecting any list that
+   * contained an overlap sounded stricter and was in fact useless: the seed
+   * ships a deliberate conflict so the Today screen has something to put in
+   * its needs-attention queue, so every save failed, and nothing an operator
+   * did on the demo survived a reload. The API has never behaved that way —
+   * it refuses the booking being written, not the state of the table around
+   * it — and this now matches.
+   */
+  async saveBookings(bookings) {
+    const before = LocalRepository.#conflictPairs(read(KEY_BOOKINGS) ?? [])
+    for (const pair of LocalRepository.#conflictPairs(bookings)) {
+      if (!before.has(pair)) throw new ConflictError()
     }
     write(KEY_BOOKINGS, bookings)
   }

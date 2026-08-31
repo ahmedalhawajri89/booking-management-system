@@ -12,6 +12,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import SkeletonBlock from '@/components/ui/SkeletonBlock.vue'
 import { useBookingsStore } from '@/stores/bookings'
 import { useCustomersStore } from '@/stores/customers'
+import { isDemoBackend } from '@/data/repository'
 import { fullDate, money, timeRange } from '@/lib/format'
 
 /**
@@ -29,8 +30,33 @@ const verified = ref(false)
 const attempted = ref(false)
 const confirmCancel = ref(false)
 
-const booking = computed(() => bookings.items.find((b) => b.reference === reference.value) ?? null)
-const view = computed(() => (booking.value ? bookings.hydrate(booking.value) : null))
+/**
+ * Two backends, one screen.
+ *
+ * On the demo backend every booking is in the browser, so the store has it and
+ * the phone is checked here. Against the API it cannot work that way: a guest
+ * reading /bookings gets an empty list by design, because the alternative is
+ * handing every visitor the whole customer directory. The reference and the
+ * phone go to the server instead, which answers with this one booking or with
+ * nothing at all.
+ */
+const remote = ref(null)
+
+const booking = computed(() =>
+  isDemoBackend
+    ? (bookings.items.find((b) => b.reference === reference.value) ?? null)
+    : remote.value,
+)
+
+const view = computed(() =>
+  isDemoBackend && booking.value ? bookings.hydrate(booking.value) : null,
+)
+
+/** The API returns the service name flat; the store resolves it through a join. */
+const serviceName = computed(() =>
+  isDemoBackend ? (view.value?.service?.name ?? '') : (remote.value?.serviceName ?? ''),
+)
+
 const canCancel = computed(
   () =>
     booking.value?.status === 'pending' ||
@@ -38,25 +64,55 @@ const canCancel = computed(
 )
 
 onMounted(async () => {
-  await Promise.all([bookings.load(), customers.load()])
+  // Nothing to preload against the API — the lookup is the load, and it does
+  // not happen until the visitor has proved the booking is theirs.
+  if (isDemoBackend) await Promise.all([bookings.load(), customers.load()])
 })
 
-function verify() {
+async function verify() {
   attempted.value = true
-  const digits = phone.value.replace(/\D/g, '')
-  const stored = view.value?.customer?.phone.replace(/\D/g, '') ?? ''
-  if (digits.length >= 9 && stored.endsWith(digits.slice(-9))) {
+
+  if (isDemoBackend) {
+    const digits = phone.value.replace(/\D/g, '')
+    const stored = view.value?.customer?.phone.replace(/\D/g, '') ?? ''
+    if (digits.length >= 9 && stored.endsWith(digits.slice(-9))) {
+      verified.value = true
+    } else {
+      toast.error('رقم الجوال لا يطابق هذا الحجز')
+    }
+    return
+  }
+
+  try {
+    const { lookupBooking } = await import('@/data/api/public')
+    remote.value = await lookupBooking(reference.value, phone.value)
     verified.value = true
-  } else {
+  } catch {
+    // One message for "no such reference" and for "wrong phone", deliberately.
+    // Distinguishing them would turn this form into a way to discover which
+    // reference numbers exist, and they are sequential enough to enumerate.
     toast.error('رقم الجوال لا يطابق هذا الحجز')
   }
 }
 
-function cancel() {
+async function cancel() {
   if (!booking.value) return
-  bookings.setStatus(booking.value.id, 'cancelled')
   confirmCancel.value = false
-  toast.success('أُلغي حجزك')
+
+  if (isDemoBackend) {
+    bookings.setStatus(booking.value.id, 'cancelled')
+    toast.success('أُلغي حجزك')
+    return
+  }
+
+  try {
+    const { cancelBooking } = await import('@/data/api/public')
+    await cancelBooking(reference.value, phone.value)
+    remote.value = { ...remote.value, status: 'cancelled' }
+    toast.success('أُلغي حجزك')
+  } catch {
+    toast.error('تعذّر إلغاء الحجز. حاول مرة أخرى.')
+  }
 }
 </script>
 
@@ -72,11 +128,11 @@ function cancel() {
     </header>
 
     <main class="mx-auto max-w-md px-4 py-10">
-      <div v-if="bookings.isLoading && !bookings.loaded" class="surface p-4">
+      <div v-if="isDemoBackend && bookings.isLoading && !bookings.loaded" class="surface p-4">
         <SkeletonBlock variant="text" :count="4" />
       </div>
 
-      <div v-else-if="!booking" class="surface">
+      <div v-else-if="isDemoBackend && !booking" class="surface">
         <EmptyState
           variant="no-results"
           :icon="SearchX"
@@ -112,7 +168,7 @@ function cancel() {
       </div>
 
       <!-- the booking -->
-      <div v-else-if="view" class="space-y-4">
+      <div v-else-if="booking" class="space-y-4">
         <div class="surface p-5">
           <div class="mb-4 flex items-center justify-between gap-2">
             <span class="text-sm font-bold text-gray-900" dir="ltr">{{ booking.reference }}</span>
@@ -122,7 +178,7 @@ function cancel() {
           <dl class="space-y-3 text-sm">
             <div class="flex justify-between gap-3">
               <dt class="text-gray-500">الخدمة</dt>
-              <dd class="text-end font-semibold text-gray-900">{{ view.service?.name }}</dd>
+              <dd class="text-end font-semibold text-gray-900">{{ serviceName }}</dd>
             </div>
             <div class="flex justify-between gap-3">
               <dt class="text-gray-500">التاريخ</dt>
@@ -159,7 +215,7 @@ function cancel() {
     <ConfirmDialog
       :open="confirmCancel"
       title="إلغاء حجزك؟"
-      :message="`سيتم إلغاء موعد ${view?.service?.name ?? ''} في ${booking ? fullDate(booking.startAt) : ''}. لا يمكن التراجع عن هذا الإجراء من هنا.`"
+      :message="`سيتم إلغاء موعد ${serviceName} في ${booking ? fullDate(booking.startAt) : ''}. لا يمكن التراجع عن هذا الإجراء من هنا.`"
       confirm-label="نعم، ألغِ الحجز"
       @confirm="cancel"
       @cancel="confirmCancel = false"

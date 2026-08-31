@@ -159,10 +159,31 @@ flow rather than a translation of it, so it is not part of this port.
 
 ---
 
+## Looking a booking up without an account
+
+`/booking/{reference}` verifies before it reveals: reference plus the phone
+the booking was made with. That is two factors on purpose — `BK-2026-0431` is
+sequential and trivially guessable, so a lookup keyed on the reference alone
+would expose every booking to anyone who can count.
+
+The screen works against both backends. On the demo backend the booking is in
+the browser and the phone is checked there; against the API the reference and
+phone go to `GET /api/public/bookings/{reference}?phone=…`, which answers with
+that one booking or with nothing. A guest cannot read `/bookings` at all, so
+there is no other way for this screen to work — and no way for it to leak the
+directory while trying.
+
+Both failures — no such reference, and wrong phone — produce the same message.
+Distinguishing them would turn the form into a way to discover which reference
+numbers exist.
+
+---
+
 ## Tests
 
 ```bash
-cd api && php artisan test     # 47 tests
+npm test                       # 47 — the slot engine, exports, and the local repository
+cd api && php artisan test     # 47 — schema, access control, concurrency, the guest paths
 ```
 
 They run against MySQL, not the usual sqlite `:memory:`. The schema is not

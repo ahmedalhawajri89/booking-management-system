@@ -62,7 +62,9 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   function persist() {
-    void repository.saveCatalog(snapshot())
+    repository.saveCatalog(snapshot()).catch(() => {
+      error.value = 'تعذّر حفظ الإعدادات.'
+    })
   }
 
   /* --------------------------------------------------------------- services */

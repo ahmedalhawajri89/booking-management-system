@@ -29,7 +29,9 @@ export const useCustomersStore = defineStore('customers', () => {
   }
 
   function persist() {
-    void repository.saveCustomers(items.value)
+    repository.saveCustomers(items.value).catch(() => {
+      error.value = 'تعذّر حفظ التغييرات.'
+    })
   }
 
   function byId(id) {

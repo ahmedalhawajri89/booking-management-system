@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { addMinutes, isAfter, isBefore, isSameDay } from 'date-fns'
 import { repository } from '@/data/repository'
+import { isConflict } from '@/data/errors'
 import { businessHours, resourceById, serviceById } from '@/data/catalog'
 import { hasConflict, occupancyFor } from '@/lib/availability'
 import { bookingReference, uid } from '@/lib/id'
@@ -32,8 +33,19 @@ export const useBookingsStore = defineStore('bookings', () => {
     }
   }
 
+  /**
+   * Fire-and-forget, but not fire-and-ignore.
+   *
+   * The mutations that call this are synchronous — the screen has already
+   * moved on by the time the write resolves — so it cannot be awaited without
+   * making every caller async. What it must not do is drop the failure: an
+   * unhandled rejection is a save that silently did not happen, which is the
+   * worst of both worlds. Surfacing it in `error` means the screen says so.
+   */
   function persist() {
-    void repository.saveBookings(items.value)
+    repository.saveBookings(items.value).catch((e) => {
+      error.value = isConflict(e) ? e.message : 'تعذّر حفظ التغييرات.'
+    })
   }
 
   /* ------------------------------------------------------------- getters */
