@@ -44,8 +44,3 @@ deliberate: the `phone_digits` generated column, the fulltext index and the
 sqlite would pass while testing a different database than the one that ships.
 
 Create the test database once: `mysql -u root -e "create database booking_management_test character set utf8mb4"`.
-
----
-
-See [../docs/BACKEND.md](../docs/BACKEND.md) for what moved when this replaced
-Supabase and Postgres, and what was lost along the way.

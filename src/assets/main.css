@@ -3,7 +3,8 @@
 /* ==========================================================================
    Design tokens
    A neutral, modern SaaS identity: indigo brand, cyan accent, slate
-   neutrals. See docs/DESIGN_SYSTEM.md.
+   neutrals. Every colour, radius and shadow in the app resolves to a token
+   declared below — nothing hard-codes a hex.
    ========================================================================== */
 @theme {
   /* --- primitives: brand (indigo) --- */

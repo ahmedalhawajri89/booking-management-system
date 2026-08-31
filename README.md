@@ -91,8 +91,8 @@ php artisan serve --port=8000
 
 Then `echo "VITE_API_URL=http://localhost:8000/api" > .env.local` and
 `npm run dev`. The seeder creates an operator — `operator@example.com` /
-`password`. See [docs/BACKEND.md](docs/BACKEND.md) for what moved, and what
-was lost, when the schema left Postgres.
+`password`. `api/README.md` says what to read first, and why the Postgres
+exclusion constraint has no translation in MySQL.
 
 ---
 
@@ -111,11 +111,7 @@ src/
   components/marketing/     landing page sections
   components/ui/            base button, input, drawer, badge
   directives/reveal.js      scroll-reveal, one shared IntersectionObserver
-docs/
-  UI_UX_AUDIT.md            what was wrong and why
-  INFORMATION_ARCHITECTURE.md
-  DESIGN_SYSTEM.md          tokens, elevation, status colour rules
-  IMPLEMENTATION_PLAN.md
+  assets/main.css           design tokens — the palette, elevation and status colours
 scripts/qa.mjs              end-to-end walkthrough across 3 viewports
 api/
   routes/api.php            the whole API surface, on one screen
