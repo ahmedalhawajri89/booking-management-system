@@ -95,6 +95,50 @@ class PublicBookingController extends Controller
         });
     }
 
+    /**
+     * When a resource is busy, and nothing else.
+     *
+     * The booking wizard needs to know which times are taken so it can grey
+     * them out. It cannot read /bookings to find out — a guest gets an empty
+     * list there, deliberately, because that endpoint carries who booked what.
+     * Without this the wizard offered slots that were already gone and the
+     * visitor only learned otherwise on submit.
+     *
+     * So this answers the narrowest possible version of the question: two
+     * timestamps per busy interval on one resource, in one date range. No id,
+     * no customer, no service, no status, no price — nothing that says who is
+     * in the room, only that the room is occupied. Cancelled and no-show
+     * bookings are absent because they release their time, matching BLOCKING
+     * in src/lib/availability.js.
+     */
+    public function availability(Request $request)
+    {
+        $data = $request->validate([
+            'resourceId' => ['required', 'string'],
+            'from' => ['required', 'date'],
+            'to' => ['required', 'date', 'after_or_equal:from'],
+        ]);
+
+        $from = Carbon::parse($data['from'])->startOfDay();
+        // Capped so a caller cannot ask for a decade and make this a scan.
+        $to = Carbon::parse($data['to'])->endOfDay()->min($from->copy()->addDays(60));
+
+        $busy = Booking::query()
+            ->where('resource_id', $data['resourceId'])
+            ->whereIn('status', Booking::BLOCKING)
+            ->where('start_at', '<', $to)
+            ->where('end_at', '>', $from)
+            ->orderBy('start_at')
+            ->get(['start_at', 'end_at']);
+
+        return response()->json(
+            $busy->map(fn (Booking $b) => [
+                'startAt' => $b->start_at->toIso8601String(),
+                'endAt' => $b->end_at->toIso8601String(),
+            ])->all()
+        );
+    }
+
     /** Same identity rule as the client: the phone is the key. */
     private function upsertCustomer(string $org, array $data): Customer
     {

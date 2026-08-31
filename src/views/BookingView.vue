@@ -1,6 +1,6 @@
 ﻿<script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { startOfDay } from 'date-fns'
+import { format, startOfDay } from 'date-fns'
 import { ArrowLeft, ArrowRight, Check, Copy, Phone, User } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -43,13 +43,53 @@ const service = computed(() => services.find((s) => s.id === serviceId.value) ??
 /** Guests book the first resource that can deliver the service. */
 const resourceId = computed(() => service.value?.resourceIds[0] ?? null)
 
+/**
+ * What is already taken on the chosen resource.
+ *
+ * On the demo backend every booking is in the browser, so the store has them.
+ * Against the API a guest cannot read /bookings — that endpoint carries who
+ * booked what — so the wizard asks the availability endpoint instead, which
+ * answers with two timestamps per busy interval and nothing else.
+ *
+ * The shape below is what generateSlots() expects. A busy interval is not a
+ * booking and has no id, so it is given one that cannot collide with a real
+ * one: nothing here is ever written back, it only has to mark time as taken.
+ */
+const busy = ref([])
+
+const blocking = computed(() =>
+  isDemoBackend
+    ? bookings.items
+    : busy.value.map((b, i) => ({
+        id: `busy-${i}`,
+        resourceId: resourceId.value,
+        status: 'confirmed',
+        startAt: b.startAt,
+        endAt: b.endAt,
+      })),
+)
+
+async function loadBusy() {
+  if (isDemoBackend || !resourceId.value) return
+  try {
+    const { busyRanges } = await import('@/data/api/public')
+    const day = format(date.value, 'yyyy-MM-dd')
+    busy.value = await busyRanges(resourceId.value, day, day)
+  } catch {
+    // Falling back to "nothing is taken" is the safe direction: the wizard
+    // over-offers, and the server still refuses a slot that has gone. The
+    // opposite — treating the day as full — would hide real availability.
+    busy.value = []
+  }
+}
+
 const slots = computed(() => {
   if (!service.value || !resourceId.value) return []
   return generateSlots({
     date: date.value,
     service: service.value,
     resourceId: resourceId.value,
-    bookings: bookings.items,
+    bookings: blocking.value,
     hours: businessHours,
   })
 })
@@ -71,6 +111,11 @@ const canContinue = computed(() => {
 
 /* --- draft: a refresh or an accidental back must not destroy progress --- */
 function saveDraft() {
+  // Step 4 is the confirmation, and the booking behind it is already made.
+  // Saving there re-created the draft that submit() had just cleared, so
+  // coming back to /book dropped the visitor into step 3 of a booking they
+  // had already completed.
+  if (step.value > 3) return
   try {
     localStorage.setItem(
       DRAFT_KEY,
@@ -91,8 +136,12 @@ function saveDraft() {
 
 onMounted(async () => {
   // The guest wizard offers slots computed from services and opening hours,
-  // so the catalog has to be current before the first grid renders.
-  await Promise.all([settings.load(), bookings.load(), customers.load()])
+  // so the catalog has to be current before the first grid renders. The
+  // booking and customer stores are only loaded on the demo backend, where
+  // they are the source of what is taken; against the API a guest gets empty
+  // lists from both by design, and asks the availability endpoint instead.
+  await settings.load()
+  if (isDemoBackend) await Promise.all([bookings.load(), customers.load()])
   try {
     const raw = localStorage.getItem(DRAFT_KEY)
     if (!raw) return
@@ -116,6 +165,10 @@ watch([step, serviceId, date, startAt, name, phone, notes], saveDraft)
 watch([serviceId, date], () => {
   startAt.value = null
 })
+
+// The busy list is per resource and per day, so it is refetched whenever
+// either changes — including on the first render, once a service is chosen.
+watch([resourceId, date], loadBusy, { immediate: true })
 
 function goNext() {
   touched.value = true

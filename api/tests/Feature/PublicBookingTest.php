@@ -167,6 +167,70 @@ class PublicBookingTest extends TestCase
             ->assertStatus(422)->assertJsonPath('error', 'invalid_phone');
     }
 
+    /* ------------------------------------------------------- availability */
+
+    public function test_availability_returns_busy_intervals_for_the_resource(): void
+    {
+        $this->postJson('/api/public/bookings', $this->payload())->assertCreated();
+        $day = $this->futureSlot()->toDateString();
+
+        $response = $this->getJson("/api/public/availability?resourceId={$this->room->id}&from={$day}&to={$day}");
+
+        $response->assertOk()->assertJsonCount(1);
+        $this->assertNotEmpty($response->json('0.startAt'));
+        $this->assertNotEmpty($response->json('0.endAt'));
+    }
+
+    public function test_availability_reveals_nothing_but_the_times(): void
+    {
+        // The whole reason this endpoint exists instead of relaxing /bookings.
+        // If it ever starts carrying a name, an id or a status, the wizard
+        // stops being anonymous and nobody notices until it is in a bundle.
+        $this->postJson('/api/public/bookings', $this->payload(['name' => 'ريم الدوسري']))->assertCreated();
+        $day = $this->futureSlot()->toDateString();
+
+        $response = $this->getJson("/api/public/availability?resourceId={$this->room->id}&from={$day}&to={$day}");
+
+        $this->assertSame(['startAt', 'endAt'], array_keys($response->json('0')));
+        $this->assertStringNotContainsString('ريم', $response->getContent());
+        $this->assertStringNotContainsString('BK-', $response->getContent());
+    }
+
+    public function test_availability_ignores_a_released_booking(): void
+    {
+        $reference = $this->postJson('/api/public/bookings', $this->payload())->json('reference');
+        $day = $this->futureSlot()->toDateString();
+
+        $this->postJson("/api/public/bookings/{$reference}/cancel", ['phone' => '0501234567'])->assertOk();
+
+        // Cancelled releases its time, matching BLOCKING on the client.
+        $this->getJson("/api/public/availability?resourceId={$this->room->id}&from={$day}&to={$day}")
+            ->assertOk()->assertJsonCount(0);
+    }
+
+    public function test_availability_is_scoped_to_one_resource(): void
+    {
+        $this->postJson('/api/public/bookings', $this->payload())->assertCreated();
+        $day = $this->futureSlot()->toDateString();
+
+        $this->getJson("/api/public/availability?resourceId={$this->unofferedRoom->id}&from={$day}&to={$day}")
+            ->assertOk()->assertJsonCount(0);
+    }
+
+    public function test_availability_is_scoped_to_the_date_range(): void
+    {
+        $this->postJson('/api/public/bookings', $this->payload())->assertCreated();
+        $otherDay = $this->futureSlot()->addDays(3)->toDateString();
+
+        $this->getJson("/api/public/availability?resourceId={$this->room->id}&from={$otherDay}&to={$otherDay}")
+            ->assertOk()->assertJsonCount(0);
+    }
+
+    public function test_availability_needs_a_resource_and_a_range(): void
+    {
+        $this->getJson('/api/public/availability')->assertStatus(422);
+    }
+
     /* ------------------------------------------------------------- lookup */
 
     public function test_a_booking_can_be_looked_up_with_the_reference_and_phone(): void

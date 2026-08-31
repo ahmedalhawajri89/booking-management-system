@@ -35,6 +35,12 @@ use Illuminate\Support\Facades\Route;
 // unauthenticated caller can reach, so they are the only ones worth
 // hammering. Booking is heavier than reading because it writes.
 Route::prefix('public')->middleware('throttle:20,1')->group(function () {
+    // Busy intervals for one resource: two timestamps each, nothing else. The
+    // wizard needs them to grey out taken slots, and must not learn who is in
+    // them — which is why this is its own endpoint rather than a relaxation
+    // of the read above.
+    Route::get('availability', [PublicBookingController::class, 'availability'])
+        ->withoutMiddleware('throttle:20,1')->middleware('throttle:60,1');
     Route::post('bookings', [PublicBookingController::class, 'store']);
     Route::get('bookings/{reference}', [PublicBookingController::class, 'show']);
     Route::post('bookings/{reference}/cancel', [PublicBookingController::class, 'cancel']);

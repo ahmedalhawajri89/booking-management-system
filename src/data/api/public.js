@@ -22,6 +22,23 @@ export function bookPublic(input) {
   return request('/public/bookings', { method: 'POST', body: input, auth: false })
 }
 
+/**
+ * Busy intervals for one resource, so the wizard can grey out taken slots.
+ *
+ * Two timestamps each and nothing else — no id, no customer, no status. The
+ * alternative would be letting a guest read /bookings, which carries who
+ * booked what, to answer a question that only needs when the room is full.
+ *
+ * @param {string} resourceId
+ * @param {string} from  YYYY-MM-DD
+ * @param {string} to    YYYY-MM-DD
+ * @returns {Promise<{ startAt: string, endAt: string }[]>}
+ */
+export function busyRanges(resourceId, from, to) {
+  const q = new URLSearchParams({ resourceId, from, to })
+  return request('/public/availability?' + q, { auth: false })
+}
+
 /** Reference plus the phone it was booked with — one factor is not enough. */
 export function lookupBooking(reference, phone) {
   return request(

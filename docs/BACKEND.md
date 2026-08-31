@@ -145,17 +145,28 @@ application's.
 
 ---
 
-## Known gap: the guest wizard shows every slot as free
+## How the guest wizard knows what is taken
 
-A guest reads `/bookings` and gets an empty list, so `generateSlots()` has
-nothing to mark as taken and offers times that are already booked. The server
-refuses them with a 409 and the wizard says so, which is correct but late.
+A guest cannot read `/bookings` — that endpoint carries who booked what, and
+an anonymous caller gets an empty list from it by design. So for a while the
+wizard had nothing to mark as taken and offered times that were already gone;
+the server refused them with a 409, correctly but late.
 
-This is inherited, not introduced: the same was true of the Postgres build,
-where `bookings_read` gave an anonymous caller no rows. Fixing it properly
-means a public endpoint that returns busy ranges — start and end only, no
-customer data — for a service and a date. That is a change to the booking
-flow rather than a translation of it, so it is not part of this port.
+`GET /api/public/availability?resourceId=&from=&to=` answers the narrowest
+version of the question instead: two timestamps per busy interval on one
+resource, in one date range. No id, no customer, no service, no status, no
+price — nothing that says who is in the room, only that the room is occupied.
+Cancelled and no-show bookings are absent, matching `BLOCKING` in
+`src/lib/availability.js`.
+
+`test_availability_reveals_nothing_but_the_times` asserts the response has
+exactly the two keys and contains no name and no reference. That test is the
+point of the endpoint: the moment it starts carrying a third field, the wizard
+stops being anonymous, and nobody would notice until it was in a bundle.
+
+The client falls back to "nothing is taken" if the call fails. That is the
+safe direction — the wizard over-offers and the server still refuses a slot
+that has gone, whereas treating the day as full would hide real availability.
 
 ---
 
@@ -183,7 +194,7 @@ numbers exist.
 
 ```bash
 npm test                       # 47 — the slot engine, exports, and the local repository
-cd api && php artisan test     # 47 — schema, access control, concurrency, the guest paths
+cd api && php artisan test     # 53 — schema, access control, concurrency, the guest paths
 ```
 
 They run against MySQL, not the usual sqlite `:memory:`. The schema is not
